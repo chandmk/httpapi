@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>httpapi</name>
+    </assembly>
+    <members>
+        <!-- Badly formed XML comment ignored for member "T:httpapi.Controllers.HomeController" -->
+        <member name="M:httpapi.Controllers.HomeController.UserAgent">
+            <summary>
+            Returns user-agent
+            </summary>
+            <returns>Origin IP</returns>
+        </member>
+    </members>
+</doc>
