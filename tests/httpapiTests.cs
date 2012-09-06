@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
 using Moq;
@@ -21,6 +20,7 @@ namespace tests
         private HttpClient client;
         private HttpServer server;
         private Mock<HttpContextBase> mockContext;
+        
         [TestFixtureSetUp]
         public void Init()
         {
@@ -29,6 +29,13 @@ namespace tests
             server = new HttpServer(config);
             client = new HttpClient(server) {BaseAddress = new Uri("http://testhost/")};
             mockContext = SetUpMockHttpContext();
+        }
+
+        [TestFixtureTearDown]
+        public void TearDown()
+        {
+            server.Dispose();
+            client.Dispose();
         }
 
         private Mock<HttpContextBase> SetUpMockHttpContext()
@@ -61,6 +68,16 @@ namespace tests
         } 
         
         [Test]
+        public void Get()
+        {
+            var request = CreateRequest("get", HttpMethod.Get);
+            var result = client.SendAsync(request).Result;
+            dynamic content = result.Content.ReadAsAsync<dynamic>().Result;
+            string url = content.GetType().GetProperty("url").GetValue(content);
+            Assert.AreEqual(request.RequestUri.ToString(), url);
+        } 
+        
+        [Test]
         public void Headers()
         {
             var request = CreateRequest("headers", HttpMethod.Get);
@@ -68,14 +85,55 @@ namespace tests
             dynamic content = result.Content.ReadAsAsync<dynamic>().Result;
             Dictionary<string, string> headers = content.GetType().GetProperty("headers").GetValue(content);
             Assert.AreEqual(USER_AGENT, headers.First().Value);
+        }  
+        
+        [Test]
+        public void ResponseHeaders()
+        {
+            var request = CreateRequest("responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual("httpapi", response.Headers.GetValues("Server").First());
+            Assert.AreEqual("text/plain; charset=utf-8", response.Content.Headers.GetValues("Content-Type").First());
+
         }
 
-        [TestFixtureTearDown]
-        public void TearDown()
+        [Test]
+        public void gZip()
         {
-            server.Dispose();
-            client.Dispose();
+            var request = CreateRequest("gZip", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual("gzip", response.Content.Headers.GetValues("Content-Encoding").First());
         }
+        
+        [Test]
+        public void deflate()
+        {
+            var request = CreateRequest("deflate", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual("deflate", response.Content.Headers.GetValues("Content-Encoding").First());
+        }
+
+        [Test]
+        public void Status418()
+        {
+            var request = CreateRequest("status/418", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual("418 I'M A TEAPOT", response.ReasonPhrase);
+        }  
+        
+        [Test]
+        public void Status500()
+        {
+            var request = CreateRequest("status/500", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
 
         private HttpRequestMessage CreateRequest(string url, HttpMethod method, string mthv = null)
         {
@@ -92,6 +150,45 @@ namespace tests
 
             return request;
         }
+
+        string Serialize<T>(MediaTypeFormatter formatter, T value)
+        {
+            // Create a dummy HTTP Content.
+            Stream stream = new MemoryStream();
+            var content = new StreamContent(stream);
+            /// Serialize the object.
+            formatter.WriteToStreamAsync(typeof(T), value, stream, content, null).Wait();
+            // Read the serialized string.
+            stream.Position = 0;
+            return content.ReadAsStringAsync().Result;
+        }
+
+        T Deserialize<T>(MediaTypeFormatter formatter, string str) where T : class
+        {
+            // Write the serialized string to a memory stream.
+            Stream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(str);
+            writer.Flush();
+            stream.Position = 0;
+            // Deserialize to an object of type T
+            return formatter.ReadFromStreamAsync(typeof(T), stream, null, null).Result as T;
+        }
+
+        // Example of use
+//        void TestSerialization()
+//        {
+//            var value = new Person() { Name = "Alice", Age = 23 };
+//
+//            var xml = new XmlMediaTypeFormatter();
+//            string str = Serialize(xml, value);
+//
+//            var json = new JsonMediaTypeFormatter();
+//            str = Serialize(json, value);
+//
+//            // Round trip
+//            Person person2 = Deserialize<Person>(json, str);
+//        }
     }
 
   

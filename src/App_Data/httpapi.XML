@@ -13,9 +13,46 @@
         </member>
         <member name="M:httpapi.Controllers.HomeController.Ip">
             <summary>
-            Returns user's ip address
+            Returns origin ip
             </summary>
             <returns>ip address</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Headers">
+            <summary>
+            Returns Request Header name value pairs
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Get">
+            <summary>
+            Returns GET data. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.gzip">
+            <summary>
+            Returns gzip-encoded content.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.deflate">
+            <summary>
+            Returns dflate-encoded content.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Status(System.Int32)">
+            <summary>
+            Responds with the requested http status code
+            </summary>
+            <param name="code">HttpStatusCode</param>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.ResponseHeaders">
+            <summary>
+            Returns given response headers.
+            </summary>
+            <returns></returns>
         </member>
     </members>
 </doc>

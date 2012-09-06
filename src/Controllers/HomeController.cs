@@ -9,7 +9,6 @@ using System.ServiceModel.Channels;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace httpapi.Controllers
@@ -45,7 +44,7 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
-        /// Returns user's ip address
+        /// Returns origin ip
         /// </summary>
         /// <returns>ip address</returns>
         [System.Web.Http.HttpGet]
@@ -58,6 +57,10 @@ namespace httpapi.Controllers
                            };
         }
 
+        /// <summary>
+        /// Returns Request Header name value pairs
+        /// </summary>
+        /// <returns></returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Headers()
         {
@@ -68,6 +71,10 @@ namespace httpapi.Controllers
                            };
         }
 
+        /// <summary>
+        /// Returns GET data. 
+        /// </summary>
+        /// <returns></returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Get()
         {
@@ -78,6 +85,10 @@ namespace httpapi.Controllers
             };
         }
 
+        /// <summary>
+        /// Returns gzip-encoded content.
+        /// </summary>
+        /// <returns></returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage gzip()
         {
@@ -88,6 +99,10 @@ namespace httpapi.Controllers
             };
         }
 
+        /// <summary>
+        /// Returns dflate-encoded content.
+        /// </summary>
+        /// <returns></returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage deflate()
         {
@@ -98,6 +113,11 @@ namespace httpapi.Controllers
             };
         }
 
+        /// <summary>
+        /// Responds with the requested http status code
+        /// </summary>
+        /// <param name="code">HttpStatusCode</param>
+        /// <returns></returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Status(int code)
         {
@@ -109,17 +129,31 @@ namespace httpapi.Controllers
                     return Request.CreateResponse((HttpStatusCode)code);
             }
         }
+
+        /// <summary>
+        /// Returns given response headers.
+        /// </summary>
+        /// <returns></returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage ResponseHeaders()
         {
             var querystring = Request.RequestUri.ParseQueryString();
-            var results = querystring.AllKeys.Where(key => Enum.IsDefined(typeof(HttpResponseHeader), key.Replace("-", ""))).ToDictionary(key => key, key => string.Join(",", querystring[key]));
+            var headers = querystring.AllKeys.Where(key => Enum.IsDefined(typeof(HttpResponseHeader), key.Replace("-", ""))).ToDictionary(key => key, key => string.Join(",", querystring[key]));
 
-            return new HttpResponseMessage(HttpStatusCode.OK)
+            var response = Request.CreateResponse(HttpStatusCode.OK, headers, jsonMediaTypeFormatter);
+
+            foreach (var header in headers)
             {
-                Content =
-                    new ObjectContent<dynamic>(results, jsonMediaTypeFormatter)
-            };
+               if(header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+               {
+                   string[] contentTypeParts = header.Value.Split(';');
+                   response.Content.Headers.ContentType.MediaType = contentTypeParts.First();
+               }
+                response.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+
+            return response;
+
         }
 
         private string UserIPAddress
