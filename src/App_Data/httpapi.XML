@@ -54,5 +54,17 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:httpapi.Controllers.HomeController.Redirect(System.Int32)">
+            <summary>
+            Redirects the request for n times before returning GET content.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.RelativeRedirect(System.Int32)">
+            <summary>
+            Redirects to a relative url for n times before returning GET content.
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

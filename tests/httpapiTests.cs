@@ -132,6 +132,15 @@ namespace tests
             var response = client.SendAsync(request).Result;
 
             Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+        } 
+        
+        [Test]
+        public void Redirect()
+        {
+            var request = CreateRequest("redirect/6", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.IsTrue(response.Headers.Location.ToString().EndsWith("redirect/5"));
         }
 
 

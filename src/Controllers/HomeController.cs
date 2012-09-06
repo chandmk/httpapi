@@ -144,17 +144,47 @@ namespace httpapi.Controllers
 
             foreach (var header in headers)
             {
-               if(header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
-               {
-                   string[] contentTypeParts = header.Value.Split(';');
-                   response.Content.Headers.ContentType.MediaType = contentTypeParts.First();
-               }
+                if (header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+                {
+                    string[] contentTypeParts = header.Value.Split(';');
+                    response.Content.Headers.ContentType.MediaType = contentTypeParts.First();
+                }
                 response.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
 
             return response;
-
         }
+
+        /// <summary>
+        /// Redirects the request for n times before returning GET content.
+        /// </summary>
+        /// <returns></returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Redirect(int times)
+        {
+            var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
+            redirectResponse.Headers.Location = times > 0
+                                                    ? new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)))
+                                                     : new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port, "get").Uri;
+            return redirectResponse;
+        } 
+        
+//        /// <summary>
+//        /// Redirects to a relative url for n times before returning GET content.
+//        /// </summary>
+//        /// <returns></returns>
+//        [System.Web.Http.HttpGet]
+//        public HttpResponseMessage RelativeRedirect(int times)
+//        {
+//            var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
+//            var redirectUri = new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)));
+//            var baseUri = new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port, "Redirect").Uri;
+//            var relativeUri = baseUri.MakeRelativeUri(redirectUri);
+//            redirectResponse.Headers.Location = times > 0 ? relativeUri : new Uri(baseUri + "/Get");
+//            return redirectResponse;
+//        }
+
+
 
         private string UserIPAddress
         {
