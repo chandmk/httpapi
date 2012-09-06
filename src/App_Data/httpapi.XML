@@ -11,5 +11,11 @@
             </summary>
             <returns>Origin IP</returns>
         </member>
+        <member name="M:httpapi.Controllers.HomeController.Ip">
+            <summary>
+            Returns user's ip address
+            </summary>
+            <returns>ip address</returns>
+        </member>
     </members>
 </doc>
