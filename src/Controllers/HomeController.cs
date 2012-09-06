@@ -95,7 +95,7 @@ namespace httpapi.Controllers
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), gzipped = true, method = Request.Method }, jsonMediaTypeFormatter), "gzip")
+                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), gzipped = true, method = Request.Method }, jsonMediaTypeFormatter), CompressedContent.EncodingType.gzip)
             };
         }
 
@@ -109,7 +109,7 @@ namespace httpapi.Controllers
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), deflated = true, method = Request.Method }, jsonMediaTypeFormatter), "deflate")
+                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), deflated = true, method = Request.Method }, jsonMediaTypeFormatter), CompressedContent.EncodingType.deflate)
             };
         }
 

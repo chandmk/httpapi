@@ -11,27 +11,18 @@ namespace httpapi.Controllers
     public class CompressedContent : HttpContent
     {
         private HttpContent originalContent;
-        private string encodingType;
+        private EncodingType encodingType;
 
-        public CompressedContent(HttpContent content, string encodingType)
+
+        public CompressedContent(HttpContent content, EncodingType encodingType)
         {
             if (content == null)
             {
                 throw new ArgumentNullException("content");
             }
 
-            if (encodingType == null)
-            {
-                throw new ArgumentNullException("encodingType");
-            }
-
             originalContent = content;
-            this.encodingType = encodingType.ToLowerInvariant();
-
-            if (this.encodingType != "gzip" && this.encodingType != "deflate")
-            {
-                throw new InvalidOperationException(string.Format("Encoding '{0}' is not supported. Only supports gzip or deflate encoding.", this.encodingType));
-            }
+            this.encodingType = encodingType;
 
             // copy the headers from the original content
             foreach (KeyValuePair<string, IEnumerable<string>> header in originalContent.Headers)
@@ -39,7 +30,7 @@ namespace httpapi.Controllers
                 this.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
 
-            this.Headers.ContentEncoding.Add(encodingType);
+            this.Headers.ContentEncoding.Add(encodingType.ToString());
         }
 
         protected override bool TryComputeLength(out long length)
@@ -52,14 +43,14 @@ namespace httpapi.Controllers
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
             Stream compressedStream = null;
-
-            if (encodingType == "gzip")
+            switch (encodingType)
             {
-                compressedStream = new GZipStream(stream, CompressionMode.Compress, leaveOpen: true);
-            }
-            else if (encodingType == "deflate")
-            {
-                compressedStream = new DeflateStream(stream, CompressionMode.Compress, leaveOpen: true);
+                case EncodingType.gzip:
+                    compressedStream = new GZipStream(stream, CompressionMode.Compress, leaveOpen: true);
+                    break;
+                case EncodingType.deflate:
+                    compressedStream = new DeflateStream(stream, CompressionMode.Compress, leaveOpen: true);
+                    break;
             }
 
             return originalContent.CopyToAsync(compressedStream).ContinueWith(tsk =>
@@ -69,6 +60,12 @@ namespace httpapi.Controllers
                         compressedStream.Dispose();
                     }
                 });
+        }
+
+        public enum EncodingType
+        {
+            gzip = 0,
+            deflate = 1
         }
     }
 }
