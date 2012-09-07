@@ -163,6 +163,26 @@ namespace tests
             Assert.AreEqual("k1=v1", response.Headers.GetValues("Set-Cookie").First());
             Assert.AreEqual("k2=v2", response.Headers.GetValues("Set-Cookie").Last());
             Assert.IsTrue(response.Headers.Location.ToString().EndsWith("cookies"));
+        }    
+        
+        [Test]
+        public void Html()
+        {
+
+            var request = CreateRequest("html", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual("text/html", response.Content.Headers.ContentType.MediaType);
+        }  
+        
+        [Test]
+        public void Delay()
+        {
+            var start = DateTime.Now.Ticks;
+            var request = CreateRequest("delay/1", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+            var end = DateTime.Now.Ticks;
+            Assert.AreEqual(1, TimeSpan.FromTicks(end - start).Seconds);
         }  
 
 

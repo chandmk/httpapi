@@ -21,7 +21,9 @@ namespace httpapi
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
-            GlobalConfiguration.Configuration.Services.Replace(typeof(IDocumentationProvider), new XmlCommentDocumentationProvider(Server.MapPath("~/App_Data/httpapi.xml")));
+            GlobalConfiguration.Configuration.Formatters.JsonFormatter.Indent = true;
+            GlobalConfiguration.Configuration.Services.Replace(typeof(IDocumentationProvider), 
+                new XmlCommentDocumentationProvider(Server.MapPath("~/App_Data/httpapi.xml")));
         }
     }
 }

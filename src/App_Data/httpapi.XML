@@ -4,85 +4,121 @@
         <name>httpapi</name>
     </assembly>
     <members>
-        <!-- Badly formed XML comment ignored for member "T:httpapi.Controllers.HomeController" -->
+        <member name="T:httpapi.Controllers.HomeController">
+            <summary>
+            Class Request Response API
+            </summary>
+        </member>
+        <member name="F:httpapi.Controllers.HomeController.I_AM_A_TEAPOT">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="M:httpapi.Controllers.HomeController.UserAgent">
             <summary>
             Returns user-agent
             </summary>
-            <returns>Origin IP</returns>
+            <returns>HttpResponseMessage.</returns>
+            <example>/useragent</example>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Ip">
             <summary>
             Returns origin ip
             </summary>
-            <returns>ip address</returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Headers">
             <summary>
             Returns request header collection
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Cookies">
-            <summary>a
+            <summary>
             Returns cookie collection
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.SetCookies">
-            <summary>a
+            <summary>
             Allows to set cookies and returns the set cookie collection
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Get">
             <summary>
-            Returns GET data. 
+            Returns GET data.
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Delay(System.Int32)">
             <summary>
-            Delays response for n-10 secs 
+            Delays response for n-10 secs
             </summary>
-            <returns></returns>
+            <param name="secs">The secs.</param>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.html">
             <summary>
-            Delays response for n-10 secs 
+            Returns html content
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.gzip">
             <summary>
             Returns gzip-encoded content.
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.deflate">
             <summary>
             Returns dflate-encoded content.
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Status(System.Int32)">
             <summary>
             Responds with the requested http status code
             </summary>
             <param name="code">HttpStatusCode</param>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.ResponseHeaders">
             <summary>
             Returns given response headers.
             </summary>
-            <returns></returns>
+            <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Redirect(System.Int32)">
             <summary>
-            Redirects the request for n times before returning GET content.
+            Redirects the request for specified times.
             </summary>
-            <returns></returns>
+            <param name="times">The times.</param>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.GetHttpContextWrapper">
+            <summary>
+            Gets the HTTP context wrapper.
+            </summary>
+            <returns>HttpContextBase.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.GetRequestHeaders">
+            <summary>
+            Gets the request headers.
+            </summary>
+            <returns>Dictionary{System.StringSystem.String}.</returns>
+        </member>
+        <member name="P:httpapi.Controllers.HomeController.UserIPAddress">
+            <summary>
+            Gets the user IP address.
+            </summary>
+            <value>The user IP address.</value>
+        </member>
+        <member name="P:httpapi.Controllers.HomeController.BaseUri">
+            <summary>
+            Gets the base URI.
+            </summary>
+            <value>The base URI.</value>
         </member>
     </members>
 </doc>

@@ -1,6 +1,18 @@
 ﻿@model System.Web.Http.Description.IApiExplorer
+@helper  ToUrl(string relativePath) {
+    var src = relativePath
+        .Replace("{code}", "418")
+        .Replace("{times}", "6")
+        .Replace("{secs}", "3")
+        .Replace("SetCookies", "setcookies?k1=v1&k2=v2")
+        .Replace("ResponseHeaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
+        ;
+    @MvcHtmlString.Create(String.Format("<a href='{0}'><strong>{1}</strong></a>", src, relativePath))
+
+}
 <header>
-    <div class="content-wrapper">
+    
+        <div class="content-wrapper">
         <div class="float-left">
             <p class="site-title">
                 <a href="~/">httpapi: HTTP Request & Response Service</a></p>
@@ -23,29 +35,7 @@
 
           <li>
 @*@api.HttpMethod*@
-          <p><strong> @api.RelativePath</strong> - @api.Documentation</p>
-
-          <blockquote>
-
-          @if (api.ParameterDescriptions.Count > 0)
-
-          {
-              <ul>
-
-              @foreach (var parameter in api.ParameterDescriptions)
-
-              {
-
-                  <li>@parameter.Name: @parameter.Documentation (@parameter.Source)</li>
-
-              }
-
-              </ul>
-
-          }
-
-          </blockquote>
-
+          <p>@ToUrl(api.RelativePath) - @api.Documentation</p>
           </li>
 
       }

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Description;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
 using httpapi.Helpers;
@@ -24,24 +24,19 @@ namespace httpapi.Controllers
         }
     }
     /// <summary>
-    /// Http request & response service
+    /// Class Request Response API
     /// </summary>
     public class HomeController : ApiController
     {
-        private readonly JsonMediaTypeFormatter jsonMediaTypeFormatter = new JsonMediaTypeFormatter();
-
-        public HomeController()
-        {
-            jsonMediaTypeFormatter.Indent = true;
-        }
-
         /// <summary>
         /// Returns user-agent
         /// </summary>
-        /// <returns>Origin IP</returns>
+        /// <returns>HttpResponseMessage.</returns>
+        /// <example>/useragent</example>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage UserAgent()
         {
+            // using newtonsoft's JObject directly
             var result = new JObject(new JProperty("user-agent", string.Join(" ", Request.Headers.UserAgent)));
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
@@ -49,51 +44,39 @@ namespace httpapi.Controllers
         /// <summary>
         /// Returns origin ip
         /// </summary>
-        /// <returns>ip address</returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Ip()
         {
-            return new HttpResponseMessage(HttpStatusCode.OK)
-                           {
-                               Content =
-                                   new ObjectContent<dynamic>(new { ip = UserIPAddress }, jsonMediaTypeFormatter)
-                           };
+            return Request.CreateResponse(HttpStatusCode.OK, new {ip = UserIPAddress});
         }
 
         /// <summary>
         /// Returns request header collection
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Headers()
         {
-            return new HttpResponseMessage(HttpStatusCode.OK)
-                           {
-                               Content =
-                                   new ObjectContent<dynamic>(new { headers = GetRequestHeaders() }, jsonMediaTypeFormatter)
-                           };
+            return Request.CreateResponse(HttpStatusCode.OK, new {headers = GetRequestHeaders()});
         }
 
-        /// <summary>a
+        /// <summary>
         /// Returns cookie collection
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Cookies()
         {
             var cookieCollection = GetHttpContextWrapper().Request.Cookies;
             var cookies = cookieCollection.AllKeys.ToDictionary(key => key, key => cookieCollection[key]);
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content =
-                    new ObjectContent<dynamic>(new { cookies }, jsonMediaTypeFormatter)
-            };
+            return Request.CreateResponse(HttpStatusCode.OK, new {cookies});
         }
 
-        /// <summary>a
+        /// <summary>
         /// Allows to set cookies and returns the set cookie collection
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage SetCookies()
         {
@@ -110,23 +93,26 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
-        /// Returns GET data. 
+        /// Returns GET data.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Get()
         {
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content =
-                    new ObjectContent<dynamic>(new { url = Request.RequestUri.ToString(), headers = GetRequestHeaders(), origin = UserIPAddress }, jsonMediaTypeFormatter)
-            };
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   new
+                                       {
+                                           url = Request.RequestUri.ToString(),
+                                           headers = GetRequestHeaders(),
+                                           origin = UserIPAddress
+                                       });
         }
 
         /// <summary>
-        /// Delays response for n-10 secs 
+        /// Delays response for n-10 secs
         /// </summary>
-        /// <returns></returns>
+        /// <param name="secs">The secs.</param>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Delay(int secs)
         {
@@ -136,14 +122,14 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
-        /// Delays response for n-10 secs 
+        /// Returns html content
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage html()
         {
-            StringBuilder sb = new StringBuilder();
-            var apiExExplorer = GlobalConfiguration.Configuration.Services.GetApiExplorer();
+            var sb = new StringBuilder();
+            var apiExExplorer = new ApiExplorer(ControllerContext.Configuration);
             foreach (var api in apiExExplorer.ApiDescriptions)
             {
                 sb.AppendFormat("<li>{0} - <strong> {1}</strong> - {2}", api.HttpMethod, api.RelativePath,
@@ -159,10 +145,8 @@ namespace httpapi.Controllers
                 }
 
             }
-            var response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content =
-                    new StringContent(string.Format(@"
+
+            var content = string.Format(@"
                             <!DOCTYPE html>
                             <html>
                                 <head><title>httpapi - Request Response Service</title></head>
@@ -175,37 +159,40 @@ namespace httpapi.Controllers
                                     </ul>
                                 </section>
                                 </body>
-                            </html>", sb.ToString()))
-            };
-            response.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/html");
+                            </html>", sb);
+
+            var response = new HttpResponseMessage {Content = new StringContent(content)};
+
+            response.Content.Headers.ContentType.MediaType ="text/html";
+            response.Content.Headers.ContentType.CharSet ="utf-8";
             return response;
         }
 
         /// <summary>
         /// Returns gzip-encoded content.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage gzip()
         {
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), gzipped = true, method = Request.Method }, jsonMediaTypeFormatter), CompressedContent.EncodingType.gzip)
+                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), gzipped = true, method = Request.Method }, JsonMediaFormatter), CompressedContent.EncodingType.gzip)
             };
         }
 
         /// <summary>
         /// Returns dflate-encoded content.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage deflate()
         {
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), deflated = true, method = Request.Method }, jsonMediaTypeFormatter), CompressedContent.EncodingType.deflate)
+                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), deflated = true, method = Request.Method }, JsonMediaFormatter), CompressedContent.EncodingType.deflate)
             };
         }
 
@@ -213,8 +200,9 @@ namespace httpapi.Controllers
         /// Responds with the requested http status code
         /// </summary>
         /// <param name="code">HttpStatusCode</param>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public HttpResponseMessage Status(int code)
         {
             switch (code)
@@ -229,14 +217,14 @@ namespace httpapi.Controllers
         /// <summary>
         /// Returns given response headers.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage ResponseHeaders()
         {
             var querystring = Request.RequestUri.ParseQueryString();
             var headers = querystring.AllKeys.Where(key => Enum.IsDefined(typeof(HttpResponseHeader), key.Replace("-", ""))).ToDictionary(key => key, key => string.Join(",", querystring[key]));
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, headers, jsonMediaTypeFormatter);
+            var response = Request.CreateResponse(HttpStatusCode.OK, headers);
 
             foreach (var header in headers)
             {
@@ -252,9 +240,10 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
-        /// Redirects the request for n times before returning GET content.
+        /// Redirects the request for specified times.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="times">The times.</param>
+        /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Redirect(int times)
         {
@@ -264,6 +253,7 @@ namespace httpapi.Controllers
                                                      : new Uri(BaseUri, "get");
             return redirectResponse;
         }
+        
 
         //        /// <summary>
         //        /// Redirects to a relative url for n times before returning GET content.
@@ -284,6 +274,10 @@ namespace httpapi.Controllers
 
 
 
+        /// <summary>
+        /// Gets the user IP address.
+        /// </summary>
+        /// <value>The user IP address.</value>
         private string UserIPAddress
         {
             get
@@ -307,6 +301,10 @@ namespace httpapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the base URI.
+        /// </summary>
+        /// <value>The base URI.</value>
         private Uri BaseUri
         {
             get
@@ -314,18 +312,37 @@ namespace httpapi.Controllers
                 return new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port).Uri;
             }
         }
+
+        private JsonMediaTypeFormatter JsonMediaFormatter
+        {
+            get
+            {
+                return ControllerContext.Configuration.Formatters.JsonFormatter;
+            }
+        }
+        /// <summary>
+        /// Gets the HTTP context wrapper.
+        /// </summary>
+        /// <returns>HttpContextBase.</returns>
         private HttpContextBase GetHttpContextWrapper()
         {
             var httpContext = this.Request.Properties["MS_HttpContext"] as HttpContextBase;
             return httpContext;
         }
 
+        /// <summary>
+        /// Gets the request headers.
+        /// </summary>
+        /// <returns>Dictionary{System.StringSystem.String}.</returns>
         private Dictionary<string, string> GetRequestHeaders()
         {
             var headers = Request.Headers.ToDictionary(header => header.Key, header => string.Join(" ", header.Value));
             return headers;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         const string I_AM_A_TEAPOT = @"
                     
 
