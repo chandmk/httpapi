@@ -17,13 +17,13 @@ namespace httpapi
                  name: "Redirect",
                 routeTemplate: "redirect/{times}",
                 defaults: new { controller = "Home", action="redirect"}
-            );   
+            );     
             
             config.Routes.MapHttpRoute(
-                 name: "RelativeRedirect",
-                routeTemplate: "relativeredirect/{times}",
-                defaults: new { controller = "Home", action="relativeredirect"}
-            ); 
+                 name: "delay",
+                routeTemplate: "delay/{secs}",
+                defaults: new { controller = "Home", action="delay"}
+            );   
             
             config.Routes.MapHttpRoute(
                  name: "DefaultApi",

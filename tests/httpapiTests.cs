@@ -44,6 +44,7 @@ namespace tests
             var mockRequest = new Mock<HttpRequestBase>();
             var mockResponse = new Mock<HttpResponseBase>();
             mockRequest.SetupGet(r => r.UserHostAddress).Returns("127.0.0.1");
+            mockRequest.SetupGet(r => r.Cookies).Returns(new HttpCookieCollection());
             mockContext.SetupGet(c => c.Request).Returns(mockRequest.Object);
             mockContext.SetupGet(c => c.Response).Returns(mockResponse.Object);
             return mockContext;
@@ -139,10 +140,30 @@ namespace tests
         {
             var request = CreateRequest("redirect/6", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
-
+           
             Assert.IsTrue(response.Headers.Location.ToString().EndsWith("redirect/5"));
         }
 
+        [Test]
+        public void Cookies()
+        {
+            var request = CreateRequest("cookies", HttpMethod.Get);
+            var result = client.SendAsync(request).Result;
+            dynamic content = result.Content.ReadAsAsync<dynamic>().Result;
+            var cookies = content.GetType().GetProperty("cookies").GetValue(content);
+            Assert.IsTrue(cookies.Count == 0);
+        }    
+        
+        [Test]
+        public void SetCookies()
+        {
+            var request = CreateRequest("setcookies?k1=v1&k2=v2", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+
+            Assert.AreEqual("k1=v1", response.Headers.GetValues("Set-Cookie").First());
+            Assert.AreEqual("k2=v2", response.Headers.GetValues("Set-Cookie").Last());
+            Assert.IsTrue(response.Headers.Location.ToString().EndsWith("cookies"));
+        }  
 
 
 

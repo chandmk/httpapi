@@ -5,7 +5,7 @@ using System.Xml.XPath;
 using System.Linq;
 using System.Reflection;
 
-namespace httpapi.Models
+namespace httpapi.Helpers
 {
    namespace System.Web.Http
    {

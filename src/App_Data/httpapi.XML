@@ -19,13 +19,37 @@
         </member>
         <member name="M:httpapi.Controllers.HomeController.Headers">
             <summary>
-            Returns Request Header name value pairs
+            Returns request header collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Cookies">
+            <summary>a
+            Returns cookie collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.SetCookies">
+            <summary>a
+            Allows to set cookies and returns the set cookie collection
             </summary>
             <returns></returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Get">
             <summary>
             Returns GET data. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Delay(System.Int32)">
+            <summary>
+            Delays response for n-10 secs 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.html">
+            <summary>
+            Delays response for n-10 secs 
             </summary>
             <returns></returns>
         </member>
@@ -57,12 +81,6 @@
         <member name="M:httpapi.Controllers.HomeController.Redirect(System.Int32)">
             <summary>
             Redirects the request for n times before returning GET content.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:httpapi.Controllers.HomeController.RelativeRedirect(System.Int32)">
-            <summary>
-            Redirects to a relative url for n times before returning GET content.
             </summary>
             <returns></returns>
         </member>

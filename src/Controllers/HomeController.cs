@@ -6,10 +6,13 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
+using System.Text;
+using System.Threading;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
+using httpapi.Helpers;
 
 namespace httpapi.Controllers
 {
@@ -40,7 +43,7 @@ namespace httpapi.Controllers
         public HttpResponseMessage UserAgent()
         {
             var result = new JObject(new JProperty("user-agent", string.Join(" ", Request.Headers.UserAgent)));
-            return Request.CreateResponse(HttpStatusCode.OK, result);
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
 
         /// <summary>
@@ -58,7 +61,7 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
-        /// Returns Request Header name value pairs
+        /// Returns request header collection
         /// </summary>
         /// <returns></returns>
         [System.Web.Http.HttpGet]
@@ -69,6 +72,41 @@ namespace httpapi.Controllers
                                Content =
                                    new ObjectContent<dynamic>(new { headers = GetRequestHeaders() }, jsonMediaTypeFormatter)
                            };
+        }
+
+        /// <summary>a
+        /// Returns cookie collection
+        /// </summary>
+        /// <returns></returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Cookies()
+        {
+            var cookieCollection = GetHttpContextWrapper().Request.Cookies;
+            var cookies = cookieCollection.AllKeys.ToDictionary(key => key, key => cookieCollection[key]);
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content =
+                    new ObjectContent<dynamic>(new { cookies }, jsonMediaTypeFormatter)
+            };
+        }
+
+        /// <summary>a
+        /// Allows to set cookies and returns the set cookie collection
+        /// </summary>
+        /// <returns></returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage SetCookies()
+        {
+            var queryString = Request.RequestUri.ParseQueryString();
+
+            var response = new HttpResponseMessage(HttpStatusCode.Redirect);
+            response.Headers.Location = new Uri(BaseUri, "cookies");
+            foreach (var qs in queryString.AllKeys)
+            {
+                response.Headers.Add("Set-Cookie", string.Format("{0}={1}", qs, queryString[qs]));
+            }
+
+            return response;
         }
 
         /// <summary>
@@ -83,6 +121,64 @@ namespace httpapi.Controllers
                 Content =
                     new ObjectContent<dynamic>(new { url = Request.RequestUri.ToString(), headers = GetRequestHeaders(), origin = UserIPAddress }, jsonMediaTypeFormatter)
             };
+        }
+
+        /// <summary>
+        /// Delays response for n-10 secs 
+        /// </summary>
+        /// <returns></returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Delay(int secs)
+        {
+            secs = secs > 10 ? 10 : secs;
+            Thread.Sleep(TimeSpan.FromSeconds(secs));
+            return Get();
+        }
+
+        /// <summary>
+        /// Delays response for n-10 secs 
+        /// </summary>
+        /// <returns></returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage html()
+        {
+            StringBuilder sb = new StringBuilder();
+            var apiExExplorer = GlobalConfiguration.Configuration.Services.GetApiExplorer();
+            foreach (var api in apiExExplorer.ApiDescriptions)
+            {
+                sb.AppendFormat("<li>{0} - <strong> {1}</strong> - {2}", api.HttpMethod, api.RelativePath,
+                                api.Documentation);
+                if (api.ParameterDescriptions.Count > 0)
+                {
+                    sb.AppendFormat("<blockquote><ul>");
+                    foreach (var parameter in api.ParameterDescriptions)
+                    {
+                        sb.AppendFormat("<li>{0}: {1} ({2})</li>", parameter.Name, parameter.Documentation, parameter.Source);
+                    }
+                    sb.AppendFormat("</ul></blockquote></li>");
+                }
+
+            }
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content =
+                    new StringContent(string.Format(@"
+                            <!DOCTYPE html>
+                            <html>
+                                <head><title>httpapi - Request Response Service</title></head>
+                                <body>
+                                    <h1>httpapi - Request Response Service</h1>
+                                    <section>
+                                    <h3>ENDPOINTS</h3>
+                                    <ul>
+                                   {0}
+                                    </ul>
+                                </section>
+                                </body>
+                            </html>", sb.ToString()))
+            };
+            response.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/html");
+            return response;
         }
 
         /// <summary>
@@ -165,24 +261,26 @@ namespace httpapi.Controllers
             var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
             redirectResponse.Headers.Location = times > 0
                                                     ? new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)))
-                                                     : new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port, "get").Uri;
+                                                     : new Uri(BaseUri, "get");
             return redirectResponse;
-        } 
-        
-//        /// <summary>
-//        /// Redirects to a relative url for n times before returning GET content.
-//        /// </summary>
-//        /// <returns></returns>
-//        [System.Web.Http.HttpGet]
-//        public HttpResponseMessage RelativeRedirect(int times)
-//        {
-//            var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
-//            var redirectUri = new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)));
-//            var baseUri = new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port, "Redirect").Uri;
-//            var relativeUri = baseUri.MakeRelativeUri(redirectUri);
-//            redirectResponse.Headers.Location = times > 0 ? relativeUri : new Uri(baseUri + "/Get");
-//            return redirectResponse;
-//        }
+        }
+
+        //        /// <summary>
+        //        /// Redirects to a relative url for n times before returning GET content.
+        //        /// </summary>
+        //        /// <returns></returns>
+        //        [System.Web.Http.HttpGet]
+        //        public HttpResponseMessage RelativeRedirect(int times)
+        //        {
+        //            var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
+        //            var redirectUri = new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)));
+        //            var baseUri = new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port, "Redirect").Uri;
+        //            var relativeUri = baseUri.MakeRelativeUri(redirectUri);
+        //            redirectResponse.Headers.Location = times > 0 ? relativeUri : new Uri(baseUri + "/Get");
+        //            return redirectResponse;
+        //        }
+
+
 
 
 
@@ -206,6 +304,14 @@ namespace httpapi.Controllers
                         return null;
                     }
                 }
+            }
+        }
+
+        private Uri BaseUri
+        {
+            get
+            {
+                return new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port).Uri;
             }
         }
         private HttpContextBase GetHttpContextWrapper()
