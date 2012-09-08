@@ -202,7 +202,6 @@ namespace httpapi.Controllers
         /// <param name="code">HttpStatusCode</param>
         /// <returns>HttpResponseMessage.</returns>
         [System.Web.Http.HttpGet]
-        [ApiExplorerSettings(IgnoreApi = true)]
         public HttpResponseMessage Status(int code)
         {
             switch (code)
@@ -249,7 +248,7 @@ namespace httpapi.Controllers
         {
             var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
             redirectResponse.Headers.Location = times > 0
-                                                    ? new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)))
+                                                    ? new Uri(BaseUri, "redirect?times=" + (times - 1))
                                                      : new Uri(BaseUri, "get");
             return redirectResponse;
         }

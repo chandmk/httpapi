@@ -120,16 +120,17 @@ namespace tests
         [Test]
         public void Status418()
         {
-            var request = CreateRequest("status/418", HttpMethod.Get);
+            var request = CreateRequest("status?code=418", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
 
+            Assert.AreEqual("418", response.StatusCode.ToString());
             Assert.AreEqual("418 I'M A TEAPOT", response.ReasonPhrase);
         }  
         
         [Test]
         public void Status500()
         {
-            var request = CreateRequest("status/500", HttpMethod.Get);
+            var request = CreateRequest("status?code=500", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
 
             Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -138,10 +139,11 @@ namespace tests
         [Test]
         public void Redirect()
         {
-            var request = CreateRequest("redirect/6", HttpMethod.Get);
+            var request = CreateRequest("redirect?times=6", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
            
-            Assert.IsTrue(response.Headers.Location.ToString().EndsWith("redirect/5"));
+            Assert.AreEqual(HttpStatusCode.Redirect, response.StatusCode);
+            Assert.IsTrue(response.Headers.Location.ToString().EndsWith("redirect?times=5"));
         }
 
         [Test]
@@ -179,9 +181,11 @@ namespace tests
         public void Delay()
         {
             var start = DateTime.Now.Ticks;
-            var request = CreateRequest("delay/1", HttpMethod.Get);
+            var request = CreateRequest("delay?secs=1", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
             var end = DateTime.Now.Ticks;
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.AreEqual(1, TimeSpan.FromTicks(end - start).Seconds);
         }  
 
