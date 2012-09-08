@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading;
@@ -48,7 +50,7 @@ namespace httpapi.Controllers
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Ip()
         {
-            return Request.CreateResponse(HttpStatusCode.OK, new {ip = UserIPAddress});
+            return Request.CreateResponse(HttpStatusCode.OK, new { ip = UserIPAddress });
         }
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace httpapi.Controllers
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Headers()
         {
-            return Request.CreateResponse(HttpStatusCode.OK, new {headers = GetRequestHeaders()});
+            return Request.CreateResponse(HttpStatusCode.OK, new { headers = GetRequestHeaders() });
         }
 
         /// <summary>
@@ -70,7 +72,7 @@ namespace httpapi.Controllers
         {
             var cookieCollection = GetHttpContextWrapper().Request.Cookies;
             var cookies = cookieCollection.AllKeys.ToDictionary(key => key, key => cookieCollection[key]);
-            return Request.CreateResponse(HttpStatusCode.OK, new {cookies});
+            return Request.CreateResponse(HttpStatusCode.OK, new { cookies });
         }
 
         /// <summary>
@@ -80,14 +82,12 @@ namespace httpapi.Controllers
         [System.Web.Http.HttpGet]
         public HttpResponseMessage SetCookies()
         {
+           
             var queryString = Request.RequestUri.ParseQueryString();
-
+            var cookieHeaderValues = queryString.AllKeys.Select(qs => new CookieHeaderValue(qs, queryString[qs])).ToList();
             var response = new HttpResponseMessage(HttpStatusCode.Redirect);
+            response.Headers.AddCookies(cookieHeaderValues);
             response.Headers.Location = new Uri(BaseUri, "cookies");
-            foreach (var qs in queryString.AllKeys)
-            {
-                response.Headers.Add("Set-Cookie", string.Format("{0}={1}", qs, queryString[qs]));
-            }
 
             return response;
         }
@@ -120,6 +120,22 @@ namespace httpapi.Controllers
             Thread.Sleep(TimeSpan.FromSeconds(secs));
             return Get();
         }
+
+
+        /// <summary>
+        /// Streams n-100 lines
+        /// </summary>
+        /// <param name="lines">The lines.</param>
+        /// <returns>HttpResponseMessage.</returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Stream(int lines = 1)
+        {
+            lines = lines > 100 ? 100 
+                : lines < 1 ? 1 : lines;
+           return new HttpResponseMessage() {Content =  new StreamContent()};
+        }
+
+
 
         /// <summary>
         /// Returns html content
@@ -161,10 +177,10 @@ namespace httpapi.Controllers
                                 </body>
                             </html>", sb);
 
-            var response = new HttpResponseMessage {Content = new StringContent(content)};
+            var response = new HttpResponseMessage { Content = new StringContent(content) };
 
-            response.Content.Headers.ContentType.MediaType ="text/html";
-            response.Content.Headers.ContentType.CharSet ="utf-8";
+            response.Content.Headers.ContentType.MediaType = "text/html";
+            response.Content.Headers.ContentType.CharSet = "utf-8";
             return response;
         }
 
@@ -252,7 +268,7 @@ namespace httpapi.Controllers
                                                      : new Uri(BaseUri, "get");
             return redirectResponse;
         }
-        
+
 
         //        /// <summary>
         //        /// Redirects to a relative url for n times before returning GET content.
@@ -269,10 +285,6 @@ namespace httpapi.Controllers
         //            return redirectResponse;
         //        }
 
-
-
-
-
         /// <summary>
         /// Gets the user IP address.
         /// </summary>
@@ -281,22 +293,17 @@ namespace httpapi.Controllers
         {
             get
             {
+                if (Request.Properties.ContainsKey("MS_HttpContext"))
                 {
-                    if (Request.Properties.ContainsKey("MS_HttpContext"))
-                    {
-                        return ((HttpContextBase)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-                    }
-                    else if (Request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
-                    {
-                        RemoteEndpointMessageProperty prop;
-                        prop = (RemoteEndpointMessageProperty)this.Request.Properties[RemoteEndpointMessageProperty.Name];
-                        return prop.Address;
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                    return ((HttpContextBase)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
                 }
+                if (Request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
+                {
+                    RemoteEndpointMessageProperty prop;
+                    prop = (RemoteEndpointMessageProperty)this.Request.Properties[RemoteEndpointMessageProperty.Name];
+                    return prop.Address;
+                }
+                return null;
             }
         }
 
