@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,24 +11,28 @@ using System.Threading;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
 using httpapi.Helpers;
 
 namespace httpapi.Controllers
 {
-    public class HelpController : Controller
-    {
-        public ActionResult Index()
-        {
-            return View(GlobalConfiguration.Configuration.Services.GetApiExplorer());
-        }
-    }
     /// <summary>
     /// Class Request Response API
     /// </summary>
     public class HomeController : ApiController
     {
+
+        /// <summary>
+        /// Returns this page
+        /// </summary>
+        /// <returns>HttpResponseMessage.</returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Index()
+        {
+            return html();
+        }
+
+
         /// <summary>
         /// Returns user-agent
         /// </summary>
@@ -132,7 +135,7 @@ namespace httpapi.Controllers
         {
             lines = lines > 100 ? 100 
                 : lines < 1 ? 1 : lines;
-           return new HttpResponseMessage() {Content =  new StreamContent()};
+            return new HttpResponseMessage();// {Content =  new StreamContent()};
         }
 
 
@@ -144,25 +147,32 @@ namespace httpapi.Controllers
         [System.Web.Http.HttpGet]
         public HttpResponseMessage html()
         {
+            var response = new HttpResponseMessage { Content = new StringContent(HelpContent()) };
+
+            response.Content.Headers.ContentType.MediaType = "text/html";
+            response.Content.Headers.ContentType.CharSet = "utf-8";
+            return response;
+        }
+
+        private string HelpContent()
+        {
             var sb = new StringBuilder();
             var apiExExplorer = new ApiExplorer(ControllerContext.Configuration);
             foreach (var api in apiExExplorer.ApiDescriptions)
             {
-                sb.AppendFormat("<li>{0} - <strong> {1}</strong> - {2}", api.HttpMethod, api.RelativePath,
-                                api.Documentation);
-                if (api.ParameterDescriptions.Count > 0)
-                {
-                    sb.AppendFormat("<blockquote><ul>");
-                    foreach (var parameter in api.ParameterDescriptions)
-                    {
-                        sb.AppendFormat("<li>{0}: {1} ({2})</li>", parameter.Name, parameter.Documentation, parameter.Source);
-                    }
-                    sb.AppendFormat("</ul></blockquote></li>");
-                }
-
+                sb.AppendFormat("<li><p><a href='{0}'><strong>/{1}</strong></a> - {2} - {3}</p>", ToLink(api.RelativePath), api.RelativePath.ToLower(), api.HttpMethod, api.Documentation);
+//                if (api.ParameterDescriptions.Count > 0)
+//                {
+//                    sb.AppendFormat("<ul>");
+//                    foreach (var parameter in api.ParameterDescriptions)
+//                    {
+//                        sb.AppendFormat("<li>{0}: {1} ({2})</li>", parameter.Name, parameter.Documentation, parameter.Source);
+//                    }
+//                    sb.AppendFormat("</ul></li>");
+//                }
             }
 
-            var content = string.Format(@"
+        var content = string.Format(@"
                             <!DOCTYPE html>
                             <html>
                                 <head><title>httpapi - Request Response Service</title></head>
@@ -170,18 +180,26 @@ namespace httpapi.Controllers
                                     <h1>httpapi - Request Response Service</h1>
                                     <section>
                                     <h3>ENDPOINTS</h3>
-                                    <ul>
+                                    <ul style='list-style:none'>
                                    {0}
                                     </ul>
                                 </section>
                                 </body>
                             </html>", sb);
+            return content;
+        }
 
-            var response = new HttpResponseMessage { Content = new StringContent(content) };
+        private HtmlString ToLink(string relativePath)
+        {
 
-            response.Content.Headers.ContentType.MediaType = "text/html";
-            response.Content.Headers.ContentType.CharSet = "utf-8";
-            return response;
+            var src = relativePath.ToLower()
+                .Replace("{code}", "418")
+                .Replace("{times}", "6")
+                .Replace("{secs}", "3")
+                .Replace("setcookies", "setcookies?k1=v1&k2=v2")
+                .Replace("responseheaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
+                ;
+            return new HtmlString(src);
         }
 
         /// <summary>

@@ -51,11 +51,19 @@ namespace tests
         }
 
         [Test]
+        public void Home()
+        {
+            var request = CreateRequest("",HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+            Assert.AreEqual("text/html", response.Content.Headers.ContentType.MediaType);
+        }
+
+        [Test]
         public void Ip()
         {
             var request = CreateRequest("ip", HttpMethod.Get);
-            var result = client.SendAsync(request).Result;
-            var content = result.Content.ReadAsAsync<dynamic>().Result.ToString();
+            var response = client.SendAsync(request).Result;
+            var content = response.Content.ReadAsAsync<dynamic>().Result.ToString();
             Assert.AreEqual(content, new { ip = "127.0.0.1" }.ToString());
         } 
         
@@ -63,8 +71,8 @@ namespace tests
         public void UserAgent()
         {
             var request = CreateRequest("useragent", HttpMethod.Get);
-            var result = client.SendAsync(request).Result;
-            var content = result.Content.ReadAsStringAsync().Result;
+            var response = client.SendAsync(request).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
             Assert.AreEqual( "{\"user-agent\":\"" + USER_AGENT + "\"}", content);
         } 
         
@@ -72,8 +80,8 @@ namespace tests
         public void Get()
         {
             var request = CreateRequest("get", HttpMethod.Get);
-            var result = client.SendAsync(request).Result;
-            dynamic content = result.Content.ReadAsAsync<dynamic>().Result;
+            var response = client.SendAsync(request).Result;
+            dynamic content = response.Content.ReadAsAsync<dynamic>().Result;
             string url = content.GetType().GetProperty("url").GetValue(content);
             Assert.AreEqual(request.RequestUri.ToString(), url);
         } 
@@ -82,8 +90,8 @@ namespace tests
         public void Headers()
         {
             var request = CreateRequest("headers", HttpMethod.Get);
-            var result = client.SendAsync(request).Result;
-            dynamic content = result.Content.ReadAsAsync<dynamic>().Result;
+            var response = client.SendAsync(request).Result;
+            dynamic content = response.Content.ReadAsAsync<dynamic>().Result;
             Dictionary<string, string> headers = content.GetType().GetProperty("headers").GetValue(content);
             Assert.AreEqual(USER_AGENT, headers.First().Value);
         }  
@@ -150,8 +158,8 @@ namespace tests
         public void Cookies()
         {
             var request = CreateRequest("cookies", HttpMethod.Get);
-            var result = client.SendAsync(request).Result;
-            dynamic content = result.Content.ReadAsAsync<dynamic>().Result;
+            var response = client.SendAsync(request).Result;
+            dynamic content = response.Content.ReadAsAsync<dynamic>().Result;
             var cookies = content.GetType().GetProperty("cookies").GetValue(content);
             Assert.IsTrue(cookies.Count == 0);
         }    

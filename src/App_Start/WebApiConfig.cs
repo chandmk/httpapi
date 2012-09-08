@@ -28,7 +28,7 @@ namespace httpapi
             config.Routes.MapHttpRoute(
                  name: "DefaultApi",
                 routeTemplate: "{action}",
-                defaults: new { controller = "Home"}
+                defaults: new { controller = "Home", action="Index"}
             );
         }
     }
