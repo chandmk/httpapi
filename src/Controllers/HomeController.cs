@@ -96,6 +96,23 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
+        /// Returns HEAD data.
+        /// </summary>
+        /// <returns>HttpResponseMessage.</returns>
+        [System.Web.Http.HttpGet]
+        public HttpResponseMessage Head()
+        {
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   new
+                                   {
+                                       url = Request.RequestUri.ToString(),
+                                       headers = GetRequestHeaders(),
+                                       origin = UserIPAddress
+                                   });
+        }
+
+
+        /// <summary>
         /// Returns GET data.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
@@ -110,6 +127,73 @@ namespace httpapi.Controllers
                                            origin = UserIPAddress
                                        });
         }
+
+        /// <summary>
+        /// Returns POST data.
+        /// </summary>
+        /// <returns>HttpResponseMessage.</returns>
+        [HttpPost]
+        public HttpResponseMessage Post()
+        {
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   new
+                                   {
+                                       url = Request.RequestUri.ToString(),
+                                       headers = GetRequestHeaders(),
+                                       origin = UserIPAddress
+                                   });
+        }
+
+        /// <summary>
+        /// Returns PUT data.
+        /// </summary>
+        /// <returns>HttpResponseMessage.</returns>
+        [HttpPost]
+        public HttpResponseMessage Put()
+        {
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   new
+                                   {
+                                       url = Request.RequestUri.ToString(),
+                                       headers = GetRequestHeaders(),
+                                       origin = UserIPAddress
+                                   });
+        }
+
+        /// <summary>
+        /// Returns DELETE data.
+        /// </summary>
+        /// <returns>HttpResponseMessage.</returns>
+        [HttpPost]
+        public HttpResponseMessage Delete()
+        {
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   new
+                                   {
+                                       url = Request.RequestUri.ToString(),
+                                       headers = GetRequestHeaders(),
+                                       origin = UserIPAddress
+                                   });
+        }
+
+        /// <summary>
+        /// Returns PATCH data.
+        /// </summary>
+        /// <returns>HttpResponseMessage.</returns>
+        [HttpPost]
+        public HttpResponseMessage Patch()
+        {
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   new
+                                   {
+                                       url = Request.RequestUri.ToString(),
+                                       headers = GetRequestHeaders(),
+                                       origin = UserIPAddress
+                                   });
+        }
+
+
+
 
         /// <summary>
         /// Delays response for n-10 secs

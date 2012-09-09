@@ -51,9 +51,39 @@
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
+        <member name="M:httpapi.Controllers.HomeController.Head">
+            <summary>
+            Returns HEAD data.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
         <member name="M:httpapi.Controllers.HomeController.Get">
             <summary>
             Returns GET data.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Post">
+            <summary>
+            Returns POST data.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Put">
+            <summary>
+            Returns PUT data.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Delete">
+            <summary>
+            Returns DELETE data.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.Patch">
+            <summary>
+            Returns PATCH data.
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
