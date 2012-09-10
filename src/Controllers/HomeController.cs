@@ -64,7 +64,7 @@ namespace httpapi.Controllers
         [HttpGet]
         public HttpResponseMessage Headers()
         {
-            return Request.CreateResponse(HttpStatusCode.OK, new { headers = GetRequestHeaders() });
+            return Request.CreateResponse(HttpStatusCode.OK, GetRequestHeaders());
         }
 
         /// <summary>

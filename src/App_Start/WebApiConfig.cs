@@ -1,5 +1,6 @@
-﻿using System.Web.Http;
-using System.Web.Mvc;
+﻿using System.Net.Http.Formatting;
+using System.Web.Http;
+using Newtonsoft.Json;
 
 namespace httpapi
 {
@@ -7,6 +8,11 @@ namespace httpapi
     {
         public static void Register(HttpConfiguration config)
         {
+            config.Formatters.JsonFormatter.MediaTypeMappings.Add(new UriPathExtensionMapping("json", "application/json"));
+            config.Formatters.XmlFormatter.MediaTypeMappings.Add(new UriPathExtensionMapping("xml", "application/xml"));
+            config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
+           
+
 //            config.Routes.MapHttpRoute(
 //                 name: "Status",
 //                routeTemplate: "status/{code}",
@@ -25,6 +31,11 @@ namespace httpapi
 //                defaults: new { controller = "Home", action="delay"}
 //            );   
 //            
+            config.Routes.MapHttpRoute(
+                name: "DefaultApiExt",
+                routeTemplate: "{action}.{ext}",
+                 defaults: new { controller = "Home", action="Index"}
+                );
             config.Routes.MapHttpRoute(
                  name: "DefaultApi",
                 routeTemplate: "{action}",
