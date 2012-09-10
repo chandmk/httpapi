@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -11,6 +13,7 @@ using System.Threading;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using httpapi.Helpers;
 
@@ -21,24 +24,22 @@ namespace httpapi.Controllers
     /// </summary>
     public class HomeController : ApiController
     {
-
         /// <summary>
         /// Returns this page
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Index()
         {
             return html();
         }
-
 
         /// <summary>
         /// Returns user-agent
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
         /// <example>/useragent</example>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage UserAgent()
         {
             // using newtonsoft's JObject directly
@@ -50,7 +51,7 @@ namespace httpapi.Controllers
         /// Returns origin ip
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Ip()
         {
             return Request.CreateResponse(HttpStatusCode.OK, new { ip = UserIPAddress });
@@ -60,7 +61,7 @@ namespace httpapi.Controllers
         /// Returns request header collection
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Headers()
         {
             return Request.CreateResponse(HttpStatusCode.OK, new { headers = GetRequestHeaders() });
@@ -70,7 +71,7 @@ namespace httpapi.Controllers
         /// Returns cookie collection
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Cookies()
         {
             var cookieCollection = GetHttpContextWrapper().Request.Cookies;
@@ -82,10 +83,10 @@ namespace httpapi.Controllers
         /// Allows to set cookies and returns the set cookie collection
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage SetCookies()
         {
-           
+
             var queryString = Request.RequestUri.ParseQueryString();
             var cookieHeaderValues = queryString.AllKeys.Select(qs => new CookieHeaderValue(qs, queryString[qs])).ToList();
             var response = new HttpResponseMessage(HttpStatusCode.Redirect);
@@ -116,7 +117,7 @@ namespace httpapi.Controllers
         /// Returns GET data.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Get()
         {
             return Request.CreateResponse(HttpStatusCode.OK,
@@ -200,7 +201,7 @@ namespace httpapi.Controllers
         /// </summary>
         /// <param name="secs">The secs.</param>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Delay(int secs)
         {
             secs = secs > 10 ? 10 : secs;
@@ -208,27 +209,53 @@ namespace httpapi.Controllers
             return Get();
         }
 
-
         /// <summary>
         /// Streams n-100 lines
         /// </summary>
         /// <param name="lines">The lines.</param>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
-        public HttpResponseMessage Stream(int lines = 1)
+        [HttpGet]
+        public HttpResponseMessage stream(int lines = 1)
         {
-            lines = lines > 100 ? 100 
-                : lines < 1 ? 1 : lines;
-            return new HttpResponseMessage();// {Content =  new StreamContent()};
+           //  FileStream fs = new FileStream("httpapi.xml", FileMode.Open);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            lines = lines > 100 ? 100
+               : lines < 1 ? 1 : lines;
+            for (var i = 0; i < lines; i++)
+            {
+                writer.WriteLine(JsonConvert.SerializeObject(GetRequestHeaders()));
+                writer.WriteLine("<br/><br/>");
+            }
+            writer.Flush();
+            stream.Position = 0;
+
+            var response = new HttpResponseMessage {Content =  new StreamContent(stream)};
+            return response;
         }
 
+        /// <summary>
+        ///  returns robots.txt rules
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public HttpResponseMessage robotstxt()
+        {
+            var response = new HttpResponseMessage()
+                       {
+                           Content = new StringContent(@"User-agent: *
+Disallow: /")
+                       };
 
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+            return response;
+        }
 
         /// <summary>
         /// Returns html content
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage html()
         {
             var response = new HttpResponseMessage { Content = new StringContent(HelpContent()) };
@@ -245,18 +272,18 @@ namespace httpapi.Controllers
             foreach (var api in apiExExplorer.ApiDescriptions)
             {
                 sb.AppendFormat("<li><p><a href='{0}'><strong>/{1}</strong></a> - {2} - {3}</p>", ToLink(api.RelativePath), api.RelativePath.ToLower(), api.HttpMethod, api.Documentation);
-//                if (api.ParameterDescriptions.Count > 0)
-//                {
-//                    sb.AppendFormat("<ul>");
-//                    foreach (var parameter in api.ParameterDescriptions)
-//                    {
-//                        sb.AppendFormat("<li>{0}: {1} ({2})</li>", parameter.Name, parameter.Documentation, parameter.Source);
-//                    }
-//                    sb.AppendFormat("</ul></li>");
-//                }
+                //                if (api.ParameterDescriptions.Count > 0)
+                //                {
+                //                    sb.AppendFormat("<ul>");
+                //                    foreach (var parameter in api.ParameterDescriptions)
+                //                    {
+                //                        sb.AppendFormat("<li>{0}: {1} ({2})</li>", parameter.Name, parameter.Documentation, parameter.Source);
+                //                    }
+                //                    sb.AppendFormat("</ul></li>");
+                //                }
             }
 
-        var content = string.Format(@"
+            var content = string.Format(@"
                             <!DOCTYPE html>
                             <html>
                                 <head><title>httpapi - Request Response Service</title></head>
@@ -279,6 +306,7 @@ namespace httpapi.Controllers
             var src = relativePath.ToLower()
                 .Replace("{code}", "418")
                 .Replace("{times}", "6")
+                .Replace("{lines}", "10")
                 .Replace("{secs}", "3")
                 .Replace("setcookies", "setcookies?k1=v1&k2=v2")
                 .Replace("responseheaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
@@ -290,7 +318,7 @@ namespace httpapi.Controllers
         /// Returns gzip-encoded content.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage gzip()
         {
             return new HttpResponseMessage(HttpStatusCode.OK)
@@ -304,7 +332,7 @@ namespace httpapi.Controllers
         /// Returns dflate-encoded content.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage deflate()
         {
             return new HttpResponseMessage(HttpStatusCode.OK)
@@ -319,7 +347,7 @@ namespace httpapi.Controllers
         /// </summary>
         /// <param name="code">HttpStatusCode</param>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Status(int code)
         {
             switch (code)
@@ -335,7 +363,7 @@ namespace httpapi.Controllers
         /// Returns given response headers.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage ResponseHeaders()
         {
             var querystring = Request.RequestUri.ParseQueryString();
@@ -361,7 +389,7 @@ namespace httpapi.Controllers
         /// </summary>
         /// <param name="times">The times.</param>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Redirect(int times)
         {
             var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
@@ -376,7 +404,7 @@ namespace httpapi.Controllers
         //        /// Redirects to a relative url for n times before returning GET content.
         //        /// </summary>
         //        /// <returns></returns>
-        //        [System.Web.Http.HttpGet]
+        //        [HttpGet]
         //        public HttpResponseMessage RelativeRedirect(int times)
         //        {
         //            var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);

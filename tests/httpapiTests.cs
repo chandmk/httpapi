@@ -197,6 +197,13 @@ namespace tests
             Assert.AreEqual(1, TimeSpan.FromTicks(end - start).Seconds);
         }  
 
+        [Test]
+        public void Stream()
+        {
+            var request = CreateRequest("stream?lines=1", HttpMethod.Get);
+            var response = client.SendAsync(request).Result;
+           Assert.IsTrue(response.Content is StreamContent);
+        }
 
 
         private HttpRequestMessage CreateRequest(string url, HttpMethod method, string mthv = null)

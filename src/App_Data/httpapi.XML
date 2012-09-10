@@ -94,12 +94,18 @@
             <param name="secs">The secs.</param>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.Stream(System.Int32)">
+        <member name="M:httpapi.Controllers.HomeController.stream(System.Int32)">
             <summary>
             Streams n-100 lines
             </summary>
             <param name="lines">The lines.</param>
             <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.Controllers.HomeController.robotstxt">
+            <summary>
+             returns robots.txt rules
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.html">
             <summary>
