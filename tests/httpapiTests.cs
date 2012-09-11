@@ -16,7 +16,7 @@ namespace tests
     [TestFixture]
     public class HttpapiTests
     {
-        private const string USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:17.0) Gecko/17.0 Firefox/17.0";
+        private const string USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1";
         private HttpClient client;
         private HttpServer server;
         private Mock<HttpContextBase> mockContext;
@@ -63,8 +63,8 @@ namespace tests
         {
             var request = CreateRequest("ip", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
-            var content = response.Content.ReadAsAsync<dynamic>().Result.ToString();
-            Assert.AreEqual(content, new { ip = "127.0.0.1" }.ToString());
+
+            Assert.AreEqual("\"127.0.0.1\"", response.Content.ReadAsStringAsync().Result);
         } 
         
         [Test]
@@ -73,7 +73,7 @@ namespace tests
             var request = CreateRequest("useragent", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
             var content = response.Content.ReadAsStringAsync().Result;
-            Assert.AreEqual( "{\"user-agent\":\"" + USER_AGENT + "\"}", content);
+            Assert.AreEqual(USER_AGENT, content.TrimStart('"').TrimEnd('"'));
         } 
         
         [Test]
@@ -91,8 +91,7 @@ namespace tests
         {
             var request = CreateRequest("headers", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
-            dynamic content = response.Content.ReadAsAsync<dynamic>().Result;
-            Dictionary<string, string> headers = content.GetType().GetProperty("headers").GetValue(content);
+            var headers = response.Content.ReadAsAsync<Dictionary<String, string>>().Result;
             Assert.AreEqual(USER_AGENT, headers.First().Value);
         }  
         
@@ -159,8 +158,7 @@ namespace tests
         {
             var request = CreateRequest("cookies", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
-            dynamic content = response.Content.ReadAsAsync<dynamic>().Result;
-            var cookies = content.GetType().GetProperty("cookies").GetValue(content);
+            var cookies = response.Content.ReadAsAsync<Dictionary<string, HttpCookie>>().Result;
             Assert.IsTrue(cookies.Count == 0);
         }    
         

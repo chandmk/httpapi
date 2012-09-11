@@ -9,7 +9,7 @@
             Class Request Response API
             </summary>
         </member>
-        <member name="F:httpapi.Controllers.HomeController.I_AM_A_TEAPOT">
+        <member name="F:httpapi.Controllers.HomeController.IAM_A_TEAPOT">
             <summary>
             
             </summary>
@@ -25,7 +25,6 @@
             Returns user-agent
             </summary>
             <returns>HttpResponseMessage.</returns>
-            <example>/useragent</example>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Ip">
             <summary>
@@ -94,32 +93,32 @@
             <param name="secs">The secs.</param>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.stream(System.Int32)">
+        <member name="M:httpapi.Controllers.HomeController.Stream(System.Int32)">
             <summary>
             Streams n-100 lines
             </summary>
             <param name="lines">The lines.</param>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.robotstxt">
+        <member name="M:httpapi.Controllers.HomeController.Robotstxt">
             <summary>
              returns robots.txt rules
             </summary>
             <returns></returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.html">
+        <member name="M:httpapi.Controllers.HomeController.Html">
             <summary>
             Returns html content
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.gzip">
+        <member name="M:httpapi.Controllers.HomeController.Gzip">
             <summary>
             Returns gzip-encoded content.
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.deflate">
+        <member name="M:httpapi.Controllers.HomeController.Deflate">
             <summary>
             Returns dflate-encoded content.
             </summary>
@@ -157,7 +156,7 @@
             </summary>
             <returns>Dictionary{System.StringSystem.String}.</returns>
         </member>
-        <member name="P:httpapi.Controllers.HomeController.UserIPAddress">
+        <member name="P:httpapi.Controllers.HomeController.UserIpAddress">
             <summary>
             Gets the user IP address.
             </summary>

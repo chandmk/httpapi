@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using Newtonsoft.Json;
 
@@ -8,9 +9,10 @@ namespace httpapi
     {
         public static void Register(HttpConfiguration config)
         {
+            config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
             config.Formatters.JsonFormatter.MediaTypeMappings.Add(new UriPathExtensionMapping("json", "application/json"));
             config.Formatters.XmlFormatter.MediaTypeMappings.Add(new UriPathExtensionMapping("xml", "application/xml"));
-            config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
+            config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
            
 
 //            config.Routes.MapHttpRoute(

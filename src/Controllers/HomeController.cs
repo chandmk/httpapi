@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -14,8 +13,8 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using httpapi.Helpers;
+using httpapi.Models;
 
 namespace httpapi.Controllers
 {
@@ -31,20 +30,17 @@ namespace httpapi.Controllers
         [HttpGet]
         public HttpResponseMessage Index()
         {
-            return html();
+            return Html();
         }
 
         /// <summary>
         /// Returns user-agent
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        /// <example>/useragent</example>
         [HttpGet]
         public HttpResponseMessage UserAgent()
         {
-            // using newtonsoft's JObject directly
-            var result = new JObject(new JProperty("user-agent", string.Join(" ", Request.Headers.UserAgent)));
-            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+            return Request.CreateResponse(HttpStatusCode.OK, Request.Headers.UserAgent.ToString());
         }
 
         /// <summary>
@@ -54,7 +50,7 @@ namespace httpapi.Controllers
         [HttpGet]
         public HttpResponseMessage Ip()
         {
-            return Request.CreateResponse(HttpStatusCode.OK, new { ip = UserIPAddress });
+            return Request.CreateResponse(HttpStatusCode.OK, UserIpAddress);
         }
 
         /// <summary>
@@ -76,7 +72,7 @@ namespace httpapi.Controllers
         {
             var cookieCollection = GetHttpContextWrapper().Request.Cookies;
             var cookies = cookieCollection.AllKeys.ToDictionary(key => key, key => cookieCollection[key]);
-            return Request.CreateResponse(HttpStatusCode.OK, new { cookies });
+            return Request.CreateResponse(HttpStatusCode.OK, cookies);
         }
 
         /// <summary>
@@ -91,7 +87,7 @@ namespace httpapi.Controllers
             var cookieHeaderValues = queryString.AllKeys.Select(qs => new CookieHeaderValue(qs, queryString[qs])).ToList();
             var response = new HttpResponseMessage(HttpStatusCode.Redirect);
             response.Headers.AddCookies(cookieHeaderValues);
-            response.Headers.Location = new Uri(BaseUri, "cookies");
+            response.Headers.Location = ExtensionAwareReturnPath("cookies");
 
             return response;
         }
@@ -100,19 +96,18 @@ namespace httpapi.Controllers
         /// Returns HEAD data.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public HttpResponseMessage Head()
         {
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new
-                                   {
+                                   new GetModel
+                                       {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIPAddress
+                                       origin = UserIpAddress
                                    });
         }
-
-
+        
         /// <summary>
         /// Returns GET data.
         /// </summary>
@@ -121,12 +116,12 @@ namespace httpapi.Controllers
         public HttpResponseMessage Get()
         {
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new
+                                   new GetModel
                                        {
-                                           url = Request.RequestUri.ToString(),
-                                           headers = GetRequestHeaders(),
-                                           origin = UserIPAddress
-                                       });
+                                       url = Request.RequestUri.ToString(),
+                                       headers = GetRequestHeaders(),
+                                       origin = UserIpAddress
+                                   });
         }
 
         /// <summary>
@@ -141,7 +136,7 @@ namespace httpapi.Controllers
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIPAddress
+                                       origin = UserIpAddress
                                    });
         }
 
@@ -157,7 +152,7 @@ namespace httpapi.Controllers
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIPAddress
+                                       origin = UserIpAddress
                                    });
         }
 
@@ -173,7 +168,7 @@ namespace httpapi.Controllers
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIPAddress
+                                       origin = UserIpAddress
                                    });
         }
 
@@ -189,7 +184,7 @@ namespace httpapi.Controllers
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIPAddress
+                                       origin = UserIpAddress
                                    });
         }
 
@@ -215,7 +210,7 @@ namespace httpapi.Controllers
         /// <param name="lines">The lines.</param>
         /// <returns>HttpResponseMessage.</returns>
         [HttpGet]
-        public HttpResponseMessage stream(int lines = 1)
+        public HttpResponseMessage Stream(int lines = 1)
         {
            //  FileStream fs = new FileStream("httpapi.xml", FileMode.Open);
             var stream = new MemoryStream();
@@ -239,10 +234,10 @@ namespace httpapi.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public HttpResponseMessage robotstxt()
+        public HttpResponseMessage Robotstxt()
         {
-            var response = new HttpResponseMessage()
-                       {
+            var response = new HttpResponseMessage
+                               {
                            Content = new StringContent(@"User-agent: *
 Disallow: /")
                        };
@@ -256,8 +251,9 @@ Disallow: /")
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
         [HttpGet]
-        public HttpResponseMessage html()
+        public HttpResponseMessage Html()
         {
+            // we don't want to support xml and json extensions
             var response = new HttpResponseMessage { Content = new StringContent(HelpContent()) };
 
             response.Content.Headers.ContentType.MediaType = "text/html";
@@ -300,31 +296,29 @@ Disallow: /")
             return content;
         }
 
-        private HtmlString ToLink(string relativePath)
-        {
-
-            var src = relativePath.ToLower()
-                .Replace("{code}", "418")
-                .Replace("{times}", "6")
-                .Replace("{lines}", "10")
-                .Replace("{secs}", "3")
-                .Replace("setcookies", "setcookies?k1=v1&k2=v2")
-                .Replace("responseheaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
-                ;
-            return new HtmlString(src);
-        }
-
         /// <summary>
         /// Returns gzip-encoded content.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
         [HttpGet]
-        public HttpResponseMessage gzip()
+        public HttpResponseMessage Gzip()
         {
+            // we want the webapi to choose the MediaTypeFormatter to support the xml and json extension in the paths
+            var response =
+                Request.CreateResponse(HttpStatusCode.OK, new CompressedContentModel
+                                           {
+                                               origin = UserIpAddress,
+                                               headers = GetRequestHeaders(),
+                                               gzipped = true,
+                                               method = Request.Method
+                                           });
+            
+            // There is no compressed content implementation out of the box
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), gzipped = true, method = Request.Method }, JsonMediaFormatter), CompressedContent.EncodingType.gzip)
+                new CompressedContent(response.Content, 
+                        CompressedContent.EncodingType.gzip)
             };
         }
 
@@ -333,12 +327,23 @@ Disallow: /")
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
         [HttpGet]
-        public HttpResponseMessage deflate()
+        public HttpResponseMessage Deflate()
         {
+            // we want the webapi to choose the MediaTypeFormatter to support the xml and json extension in the paths
+            var response =
+                Request.CreateResponse(HttpStatusCode.OK, new CompressedContentModel
+                {
+                    origin = UserIpAddress,
+                    headers = GetRequestHeaders(),
+                    deflated = true,
+                    method = Request.Method
+                });
+            // There is no compressed content implementation out of the box
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(new ObjectContent<dynamic>(new { origin = UserIPAddress, headers = GetRequestHeaders(), deflated = true, method = Request.Method }, JsonMediaFormatter), CompressedContent.EncodingType.deflate)
+                new CompressedContent(response.Content,
+                        CompressedContent.EncodingType.deflate)
             };
         }
 
@@ -353,7 +358,7 @@ Disallow: /")
             switch (code)
             {
                 case 418:
-                    return new HttpResponseMessage() { StatusCode = (HttpStatusCode)code, ReasonPhrase = "418 I'M A TEAPOT", Content = new StringContent(I_AM_A_TEAPOT) };
+                    return new HttpResponseMessage { StatusCode = (HttpStatusCode)code, ReasonPhrase = "418 I'M A TEAPOT", Content = new StringContent(IAM_A_TEAPOT) };
                 default:
                     return Request.CreateResponse((HttpStatusCode)code);
             }
@@ -394,8 +399,8 @@ Disallow: /")
         {
             var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
             redirectResponse.Headers.Location = times > 0
-                                                    ? new Uri(BaseUri, "redirect?times=" + (times - 1))
-                                                     : new Uri(BaseUri, "get");
+                                                    ? ExtensionAwareReturnPath("redirect", "times=" + (times - 1))
+                                                     : ExtensionAwareReturnPath("get");
             return redirectResponse;
         }
 
@@ -419,7 +424,7 @@ Disallow: /")
         /// Gets the user IP address.
         /// </summary>
         /// <value>The user IP address.</value>
-        private string UserIPAddress
+        private string UserIpAddress
         {
             get
             {
@@ -429,8 +434,7 @@ Disallow: /")
                 }
                 if (Request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
                 {
-                    RemoteEndpointMessageProperty prop;
-                    prop = (RemoteEndpointMessageProperty)this.Request.Properties[RemoteEndpointMessageProperty.Name];
+                    var prop = (RemoteEndpointMessageProperty)Request.Properties[RemoteEndpointMessageProperty.Name];
                     return prop.Address;
                 }
                 return null;
@@ -449,6 +453,18 @@ Disallow: /")
             }
         }
 
+        private Uri ExtensionAwareReturnPath(string extensionlessPath, string query = "")
+        {
+            var ext = Path.GetExtension(Request.RequestUri.AbsolutePath);
+            var relativePath = extensionlessPath + ext;
+           if(!string.IsNullOrEmpty(query))
+            {
+                relativePath += "?" + query;
+            }
+            var returnPath = new Uri(BaseUri, relativePath);
+            return returnPath;
+        }
+
         private JsonMediaTypeFormatter JsonMediaFormatter
         {
             get
@@ -462,7 +478,7 @@ Disallow: /")
         /// <returns>HttpContextBase.</returns>
         private HttpContextBase GetHttpContextWrapper()
         {
-            var httpContext = this.Request.Properties["MS_HttpContext"] as HttpContextBase;
+            var httpContext = Request.Properties["MS_HttpContext"] as HttpContextBase;
             return httpContext;
         }
 
@@ -476,10 +492,24 @@ Disallow: /")
             return headers;
         }
 
+        private HtmlString ToLink(string relativePath)
+        {
+
+            var src = relativePath.ToLower()
+                .Replace("{code}", "418")
+                .Replace("{times}", "6")
+                .Replace("{lines}", "10")
+                .Replace("{secs}", "3")
+                .Replace("setcookies", "setcookies?k1=v1&k2=v2")
+                .Replace("responseheaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
+                ;
+            return new HtmlString(src);
+        }
+
         /// <summary>
         /// 
         /// </summary>
-        const string I_AM_A_TEAPOT = @"
+        const string IAM_A_TEAPOT = @"
                     
 
     -=[ teapot ]=-
