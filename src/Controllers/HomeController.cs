@@ -207,7 +207,6 @@ namespace httpapi.Controllers
         [HttpGet]
         public HttpResponseMessage Stream(int lines = 1)
         {
-           //  FileStream fs = new FileStream("httpapi.xml", FileMode.Open);
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
             lines = lines > 100 ? 100
@@ -262,7 +261,7 @@ Disallow: /")
             var apiExExplorer = new ApiExplorer(ControllerContext.Configuration);
             foreach (var api in apiExExplorer.ApiDescriptions)
             {
-                sb.AppendFormat("<li><a href='{0}'><strong>/{1}</strong></a> - {2} - {3}", ToLink(api.RelativePath), api.RelativePath.ToLower(), api.HttpMethod, api.Documentation);
+                sb.AppendFormat("<li><a href='{0}'>/{1}</a> - {2} - {3}", ToLink(api.RelativePath), api.RelativePath.ToLower(), api.HttpMethod, api.Documentation);
                 //                if (api.ParameterDescriptions.Count > 0)
                 //                {
                 //                    sb.AppendFormat("<ul>");
@@ -277,15 +276,33 @@ Disallow: /")
             var content = string.Format(@"
                             <!DOCTYPE html>
                             <html>
-                                <head><title>httpapi - Request Response Service</title></head>
+                                <head>
+                                    <title>httpapi - Request Response Service</title>
+                                    <style>
+                                        body {{font-family: monospace;font-size:14px;line-height:1.5em;}}
+                                        a:visited {{color: blue}}
+                                        ul {{list-style: none}}
+                                    </style>
+                                </head>
                                 <body>
+<a href='http://github.com/chandmk/httpapi'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png' alt='Fork me on GitHub'></a>
                                     <h1>httpapi - Request Response Service</h1>
                                     <section>
                                     <h3>ENDPOINTS</h3>
-                                    <ul style='list-style:none; line-height:1.5em;'>
-                                   {0}
+                                    <ul>
+                                    {0}
                                     </ul>
-                                </section>
+                                    </section>
+                                    <section>
+                                        <h3>DESCRIPTION</h3>
+                                        <ul><li>
+                                        Inspiration for this service is from httpbin.org.</li>  
+                                        <li>This service provides api for http scenarios. </li>
+                                        <li>All endpoints, where it makes sense by default return JSON-encoded content.</li>
+                                        <li>You can also request for xml/json by adding respective extension.</li>
+                                        <li>
+                                        &nbsp;&nbsp;<a href='/get.xml' > /get.xml </a> returns xml content. </li><li>&nbsp;&nbsp;<a href='/get.json' > /get.json </a> returns json content.</li></ul>
+                                    </section>
                                 </body>
                             </html>", sb);
             return content;
@@ -456,6 +473,7 @@ Disallow: /")
         {
 
             var src = relativePath.ToLower()
+                .Replace("{index}", "")
                 .Replace("{code}", "418")
                 .Replace("{times}", "6")
                 .Replace("{lines}", "10")

@@ -53,19 +53,19 @@
         </member>
         <member name="M:httpapi.Controllers.HomeController.Post">
             <summary>
-            Returns POST data.
+            Adds key value pairs to the existing key value pairs. Server maintains a key value pair of k0/v0 for testing.
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
         <member name="M:httpapi.Controllers.HomeController.Put">
             <summary>
-            Returns PUT data.
+            Replaces the key value pair data.  Server maintains a key value pair of k0/v0 for testing.
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.Delete">
+        <member name="M:httpapi.Controllers.HomeController.Delete(System.String)">
             <summary>
-            Returns DELETE data.
+            Deletes the data for the given key. Server maintains a key value pair of k0/v0 for testing.
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
