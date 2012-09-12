@@ -10,6 +10,7 @@ using System.Web.Http;
 using Moq;
 using NUnit.Framework;
 using httpapi;
+using httpapi.Models;
 
 namespace tests
 {
@@ -28,6 +29,7 @@ namespace tests
             WebApiConfig.Register(config);
             server = new HttpServer(config);
             client = new HttpClient(server) {BaseAddress = new Uri("http://testhost/")};
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(USER_AGENT);
             mockContext = SetUpMockHttpContext();
         }
 
@@ -77,13 +79,22 @@ namespace tests
         } 
         
         [Test]
+        public void Head()
+        {
+            var request = CreateRequest("get", HttpMethod.Head);
+            var response = client.SendAsync(request).Result;
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            //TODO: Why httpclient is able to fetch the content, in theory HEAD method response shouldn't have body
+            //Assert.IsNull(response.Content);
+        } 
+        
+        [Test]
         public void Get()
         {
             var request = CreateRequest("get", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
-            dynamic content = response.Content.ReadAsAsync<dynamic>().Result;
-            string url = content.GetType().GetProperty("url").GetValue(content);
-            Assert.AreEqual(request.RequestUri.ToString(), url);
+            GetModel content = response.Content.ReadAsAsync<GetModel>().Result;
+            Assert.AreEqual(request.RequestUri.ToString(), content.url);
         } 
         
         [Test]
@@ -107,7 +118,7 @@ namespace tests
         }
 
         [Test]
-        public void gZip()
+        public void GZip()
         {
             var request = CreateRequest("gZip", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
@@ -116,7 +127,7 @@ namespace tests
         }
         
         [Test]
-        public void deflate()
+        public void Deflate()
         {
             var request = CreateRequest("deflate", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
@@ -203,12 +214,43 @@ namespace tests
            Assert.IsTrue(response.Content is StreamContent);
         }
 
+        [Test]
+        public void Post()
+        {
+            var request = CreateRequest("post", HttpMethod.Post);
+            var kv = new List<KeyValuePair<string, string>> {new KeyValuePair<string, string>("k1", "v1")};
+            request.Content = new FormUrlEncodedContent(kv);
+            var response = client.SendAsync(request).Result;
+            var result = response.Content.ReadAsAsync<PostModel>().Result;
+            Assert.AreEqual(2, result.form.Count);
+            Assert.AreEqual("v1", result.form["k1"]);
+        }
 
+        [Test]
+        public void Put()
+        {
+            var request = CreateRequest("put", HttpMethod.Put);
+            var kv = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("k0", "v1") };
+            request.Content = new FormUrlEncodedContent(kv);
+            var response = client.SendAsync(request).Result;
+            var result = response.Content.ReadAsAsync<PostModel>().Result;
+            Assert.AreEqual(1, result.form.Count);
+            Assert.AreEqual("v1", result.form["k0"]);
+        } 
+        
+        [Test]
+        public void Delete()
+        {
+            var request = CreateRequest("delete?key=k0", HttpMethod.Delete);
+            var response = client.SendAsync(request).Result;
+            var result = response.Content.ReadAsAsync<PostModel>().Result;
+            Assert.AreEqual(0, result.form.Count);
+        }
+        
         private HttpRequestMessage CreateRequest(string url, HttpMethod method, string mthv = null)
         {
             var request = new HttpRequestMessage {RequestUri = new Uri("http://testhost/" + url), Method = method};
 //            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mthv));
-            request.Headers.UserAgent.ParseAdd(USER_AGENT);
             request.Properties["MS_HttpContext"] = mockContext.Object;
             return request;
         }

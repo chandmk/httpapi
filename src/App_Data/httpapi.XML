@@ -9,11 +9,6 @@
             Class Request Response API
             </summary>
         </member>
-        <member name="F:httpapi.Controllers.HomeController.IAM_A_TEAPOT">
-            <summary>
-            
-            </summary>
-        </member>
         <member name="M:httpapi.Controllers.HomeController.Index">
             <summary>
             Returns this page
@@ -50,15 +45,9 @@
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
-        <member name="M:httpapi.Controllers.HomeController.Head">
-            <summary>
-            Returns HEAD data.
-            </summary>
-            <returns>HttpResponseMessage.</returns>
-        </member>
         <member name="M:httpapi.Controllers.HomeController.Get">
             <summary>
-            Returns GET data.
+            Returns GET data.  Allows HEAD method calls.
             </summary>
             <returns>HttpResponseMessage.</returns>
         </member>
@@ -139,7 +128,7 @@
         </member>
         <member name="M:httpapi.Controllers.HomeController.Redirect(System.Int32)">
             <summary>
-            Redirects the request for specified times.
+            302 Redirects n times.
             </summary>
             <param name="times">The times.</param>
             <returns>HttpResponseMessage.</returns>
@@ -149,24 +138,6 @@
             Gets the HTTP context wrapper.
             </summary>
             <returns>HttpContextBase.</returns>
-        </member>
-        <member name="M:httpapi.Controllers.HomeController.GetRequestHeaders">
-            <summary>
-            Gets the request headers.
-            </summary>
-            <returns>Dictionary{System.StringSystem.String}.</returns>
-        </member>
-        <member name="P:httpapi.Controllers.HomeController.UserIpAddress">
-            <summary>
-            Gets the user IP address.
-            </summary>
-            <value>The user IP address.</value>
-        </member>
-        <member name="P:httpapi.Controllers.HomeController.BaseUri">
-            <summary>
-            Gets the base URI.
-            </summary>
-            <value>The base URI.</value>
         </member>
     </members>
 </doc>

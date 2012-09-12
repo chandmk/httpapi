@@ -91,28 +91,12 @@ namespace httpapi.Controllers
 
             return response;
         }
-
-        /// <summary>
-        /// Returns HEAD data.
-        /// </summary>
-        /// <returns>HttpResponseMessage.</returns>
-        [HttpGet]
-        public HttpResponseMessage Head()
-        {
-            return Request.CreateResponse(HttpStatusCode.OK,
-                                   new GetModel
-                                       {
-                                       url = Request.RequestUri.ToString(),
-                                       headers = GetRequestHeaders(),
-                                       origin = UserIpAddress
-                                   });
-        }
         
         /// <summary>
-        /// Returns GET data.
+        /// Returns GET data.  Allows HEAD method calls.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [HttpGet]
+        [HttpHead, HttpGet]
         public HttpResponseMessage Get()
         {
             return Request.CreateResponse(HttpStatusCode.OK,
@@ -125,50 +109,61 @@ namespace httpapi.Controllers
         }
 
         /// <summary>
-        /// Returns POST data.
+        /// Adds key value pairs to the existing key value pairs. Server maintains a key value pair of k0/v0 for testing.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
         [HttpPost]
         public HttpResponseMessage Post()
         {
+            var existingHeaders = new GetModel().form;
+            var newHeaders = Request.Content.ReadAsFormDataAsync().Result;
+            newHeaders.Add(existingHeaders);
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new
+                                   new PostModel()
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIpAddress
+                                       origin = UserIpAddress,
+                                       form = newHeaders
                                    });
         }
 
         /// <summary>
-        /// Returns PUT data.
+        /// Replaces the key value pair data.  Server maintains a key value pair of k0/v0 for testing.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [HttpPost]
+        [HttpPut]
         public HttpResponseMessage Put()
         {
+            var existingHeaders = new GetModel().form;
+            var newHeaders = Request.Content.ReadAsFormDataAsync().Result;
+            existingHeaders.Set(existingHeaders.AllKeys[0], newHeaders[existingHeaders.AllKeys[0]]);
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new
+                                   new PostModel()
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIpAddress
+                                       origin = UserIpAddress,
+                                       form = existingHeaders
                                    });
         }
 
         /// <summary>
-        /// Returns DELETE data.
+        /// Deletes the data for the given key. Server maintains a key value pair of k0/v0 for testing.
         /// </summary>
         /// <returns>HttpResponseMessage.</returns>
-        [HttpPost]
-        public HttpResponseMessage Delete()
+        [HttpDelete]
+        public HttpResponseMessage Delete(string key)
         {
+            var existingHeaders = new GetModel().form;
+            existingHeaders.Remove(key);
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new
+                                   new PostModel()
                                    {
                                        url = Request.RequestUri.ToString(),
                                        headers = GetRequestHeaders(),
-                                       origin = UserIpAddress
+                                       origin = UserIpAddress,
+                                       form = existingHeaders
                                    });
         }
 
@@ -267,7 +262,7 @@ Disallow: /")
             var apiExExplorer = new ApiExplorer(ControllerContext.Configuration);
             foreach (var api in apiExExplorer.ApiDescriptions)
             {
-                sb.AppendFormat("<li><p><a href='{0}'><strong>/{1}</strong></a> - {2} - {3}</p>", ToLink(api.RelativePath), api.RelativePath.ToLower(), api.HttpMethod, api.Documentation);
+                sb.AppendFormat("<li><a href='{0}'><strong>/{1}</strong></a> - {2} - {3}", ToLink(api.RelativePath), api.RelativePath.ToLower(), api.HttpMethod, api.Documentation);
                 //                if (api.ParameterDescriptions.Count > 0)
                 //                {
                 //                    sb.AppendFormat("<ul>");
@@ -287,7 +282,7 @@ Disallow: /")
                                     <h1>httpapi - Request Response Service</h1>
                                     <section>
                                     <h3>ENDPOINTS</h3>
-                                    <ul style='list-style:none'>
+                                    <ul style='list-style:none; line-height:1.5em;'>
                                    {0}
                                     </ul>
                                 </section>
@@ -390,7 +385,7 @@ Disallow: /")
         }
 
         /// <summary>
-        /// Redirects the request for specified times.
+        /// 302 Redirects n times.
         /// </summary>
         /// <param name="times">The times.</param>
         /// <returns>HttpResponseMessage.</returns>
@@ -404,26 +399,6 @@ Disallow: /")
             return redirectResponse;
         }
 
-
-        //        /// <summary>
-        //        /// Redirects to a relative url for n times before returning GET content.
-        //        /// </summary>
-        //        /// <returns></returns>
-        //        [HttpGet]
-        //        public HttpResponseMessage RelativeRedirect(int times)
-        //        {
-        //            var redirectResponse = Request.CreateResponse(HttpStatusCode.Redirect);
-        //            var redirectUri = new Uri(Request.RequestUri.AbsoluteUri.Replace("/" + times, "/" + (times - 1)));
-        //            var baseUri = new UriBuilder(Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port, "Redirect").Uri;
-        //            var relativeUri = baseUri.MakeRelativeUri(redirectUri);
-        //            redirectResponse.Headers.Location = times > 0 ? relativeUri : new Uri(baseUri + "/Get");
-        //            return redirectResponse;
-        //        }
-
-        /// <summary>
-        /// Gets the user IP address.
-        /// </summary>
-        /// <value>The user IP address.</value>
         private string UserIpAddress
         {
             get
@@ -441,10 +416,6 @@ Disallow: /")
             }
         }
 
-        /// <summary>
-        /// Gets the base URI.
-        /// </summary>
-        /// <value>The base URI.</value>
         private Uri BaseUri
         {
             get
@@ -464,14 +435,7 @@ Disallow: /")
             var returnPath = new Uri(BaseUri, relativePath);
             return returnPath;
         }
-
-        private JsonMediaTypeFormatter JsonMediaFormatter
-        {
-            get
-            {
-                return ControllerContext.Configuration.Formatters.JsonFormatter;
-            }
-        }
+      
         /// <summary>
         /// Gets the HTTP context wrapper.
         /// </summary>
@@ -482,10 +446,6 @@ Disallow: /")
             return httpContext;
         }
 
-        /// <summary>
-        /// Gets the request headers.
-        /// </summary>
-        /// <returns>Dictionary{System.StringSystem.String}.</returns>
         private Dictionary<string, string> GetRequestHeaders()
         {
             var headers = Request.Headers.ToDictionary(header => header.Key, header => string.Join(" ", header.Value));
@@ -506,9 +466,6 @@ Disallow: /")
             return new HtmlString(src);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         const string IAM_A_TEAPOT = @"
                     
 
