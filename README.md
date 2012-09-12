@@ -4,6 +4,7 @@
 - [http://www.west-wind.com/weblog/posts/2012/Aug/21/An-Introduction-to-ASPNET-Web-API]
 - [http://james.newtonking.com/projects/json/help/] - JSON help newtonsoft 
 - [http://blogs.msdn.com/b/webdev/archive/2012/08/26/asp-net-web-api-and-httpclient-samples.aspx] - aspnet webapi samples
+- [httpbin.org] - Inspiration
 
 
 
