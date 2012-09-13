@@ -4,25 +4,28 @@ using System.Net.Http;
 
 namespace httpapi.web.Models
 {
-    public class GetModel
+    public class SampleData
     {
+        public SampleData()
+        {
+            form = new Dictionary<string, object>();
+        }
         public string url { get; set; }
         public Dictionary<string, string> headers { get; set; }
         public string origin { get; set; }
 
-        public NameValueCollection form
+        public Dictionary<string, object> form { get; set; }
+
+        public static SampleData WithDefaults()
         {
-            get { return new NameValueCollection() {{"k0", "v0"}}; }
+            var d = new SampleData { form = new Dictionary<string, object>() { { "k0", "v0" } } };
+            return d;
         }
 
     }
 
-    public class PostModel : GetModel
-    {
-        public new NameValueCollection form { get; set; }
-    }
 
-    public class CompressedContentModel : GetModel
+    public class CompressedContentModel : SampleData
     {
         public bool gzipped { get; set; }
         public bool deflated { get; set; }

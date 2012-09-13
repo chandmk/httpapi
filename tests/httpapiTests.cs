@@ -93,7 +93,7 @@ namespace tests
         {
             var request = CreateRequest("get", HttpMethod.Get);
             var response = client.SendAsync(request).Result;
-            GetModel content = response.Content.ReadAsAsync<GetModel>().Result;
+            SampleData content = response.Content.ReadAsAsync<SampleData>().Result;
             Assert.AreEqual(request.RequestUri.ToString(), content.url);
         } 
         
@@ -221,7 +221,7 @@ namespace tests
             var kv = new List<KeyValuePair<string, string>> {new KeyValuePair<string, string>("k1", "v1")};
             request.Content = new FormUrlEncodedContent(kv);
             var response = client.SendAsync(request).Result;
-            var result = response.Content.ReadAsAsync<PostModel>().Result;
+            var result = response.Content.ReadAsAsync<SampleData>().Result;
             Assert.AreEqual(2, result.form.Count);
             Assert.AreEqual("v1", result.form["k1"]);
         }
@@ -233,7 +233,7 @@ namespace tests
             var kv = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("k0", "v1") };
             request.Content = new FormUrlEncodedContent(kv);
             var response = client.SendAsync(request).Result;
-            var result = response.Content.ReadAsAsync<PostModel>().Result;
+            var result = response.Content.ReadAsAsync<SampleData>().Result;
             Assert.AreEqual(1, result.form.Count);
             Assert.AreEqual("v1", result.form["k0"]);
         } 
@@ -243,7 +243,7 @@ namespace tests
         {
             var request = CreateRequest("delete?key=k0", HttpMethod.Delete);
             var response = client.SendAsync(request).Result;
-            var result = response.Content.ReadAsAsync<PostModel>().Result;
+            var result = response.Content.ReadAsAsync<SampleData>().Result;
             Assert.AreEqual(0, result.form.Count);
         }
         

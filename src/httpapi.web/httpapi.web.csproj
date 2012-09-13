@@ -128,7 +128,7 @@
     <Compile Include="Helpers\CompressedContent.cs" />
     <Compile Include="Helpers\Utils.cs" />
     <Compile Include="Helpers\XmlCommentDocumentationProvider.cs" />
-    <Compile Include="Models\GetModel.cs" />
+    <Compile Include="Models\SampleData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

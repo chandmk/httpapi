@@ -1,4 +1,4 @@
-﻿@model System.Collections.Specialized.NameValueCollection
+﻿@model  Dictionary<string, object>
 
 <hgroup class="title">
     <h1>HTTP Methods</h1>
@@ -12,7 +12,7 @@
     <fieldset>
         <legend>Form</legend>
         <ol>
-            @foreach (var key in Model.AllKeys)
+            @foreach (var key in Model.Keys)
             { 
                 <li>
                     @Html.Label(key)

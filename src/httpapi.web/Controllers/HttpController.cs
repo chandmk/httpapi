@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -87,7 +88,7 @@ namespace httpapi.web.Controllers
 
             return response;
         }
-        
+
         /// <summary>
         /// Returns GET data.  Allows HEAD method calls.
         /// </summary>
@@ -95,13 +96,13 @@ namespace httpapi.web.Controllers
         [HttpHead, HttpGet]
         public HttpResponseMessage Get()
         {
+            var sampleData = SampleData.WithDefaults();
+            sampleData.url = Request.RequestUri.ToString();
+            sampleData.headers = GetRequestHeaders();
+            sampleData.origin = UserIpAddress;
+
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new GetModel
-                                       {
-                                       url = Request.RequestUri.ToString(),
-                                       headers = GetRequestHeaders(),
-                                       origin = UserIpAddress
-                                   });
+                                   sampleData);
         }
 
         /// <summary>
@@ -111,17 +112,21 @@ namespace httpapi.web.Controllers
         [HttpPost]
         public HttpResponseMessage Post()
         {
-            var existingHeaders = new GetModel().form;
+            var existingHeaders =  SampleData.WithDefaults().form;
             var newHeaders = Request.Content.ReadAsFormDataAsync().Result;
-            newHeaders.Add(existingHeaders);
+            foreach (var key in newHeaders.AllKeys)
+            {
+               existingHeaders.Add(key, newHeaders[key]);
+            }
+            var sampleData = new SampleData()
+                                 {
+                                     url = Request.RequestUri.ToString(),
+                                     headers = GetRequestHeaders(),
+                                     origin = UserIpAddress,
+                                     form = existingHeaders
+                                 };
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new PostModel()
-                                   {
-                                       url = Request.RequestUri.ToString(),
-                                       headers = GetRequestHeaders(),
-                                       origin = UserIpAddress,
-                                       form = newHeaders
-                                   });
+                                   sampleData);
         }
 
         /// <summary>
@@ -131,17 +136,18 @@ namespace httpapi.web.Controllers
         [HttpPut]
         public HttpResponseMessage Put()
         {
-            var existingHeaders = new GetModel().form;
+            var existingHeaders = SampleData.WithDefaults().form;
             var newHeaders = Request.Content.ReadAsFormDataAsync().Result;
-            existingHeaders.Set(existingHeaders.AllKeys[0], newHeaders[existingHeaders.AllKeys[0]]);
+            existingHeaders[existingHeaders.Keys.First()] = newHeaders[existingHeaders.Keys.First()];
+            var sampleData = new SampleData
+                                 {
+                                     url = Request.RequestUri.ToString(),
+                                     headers = GetRequestHeaders(),
+                                     origin = UserIpAddress,
+                                     form = existingHeaders,
+                                 };
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new PostModel()
-                                   {
-                                       url = Request.RequestUri.ToString(),
-                                       headers = GetRequestHeaders(),
-                                       origin = UserIpAddress,
-                                       form = existingHeaders
-                                   });
+                                   sampleData);
         }
 
         /// <summary>
@@ -151,16 +157,17 @@ namespace httpapi.web.Controllers
         [HttpDelete]
         public HttpResponseMessage Delete(string key)
         {
-            var existingHeaders = new GetModel().form;
-            existingHeaders.Remove(key);
+            var existingFormValues = SampleData.WithDefaults().form;
+            existingFormValues.Remove(key);
+            var sampleData = new SampleData()
+                                {
+                                    url = Request.RequestUri.ToString(),
+                                    headers = GetRequestHeaders(),
+                                    origin = UserIpAddress,
+                                    form = existingFormValues
+                                };
             return Request.CreateResponse(HttpStatusCode.OK,
-                                   new PostModel()
-                                   {
-                                       url = Request.RequestUri.ToString(),
-                                       headers = GetRequestHeaders(),
-                                       origin = UserIpAddress,
-                                       form = existingHeaders
-                                   });
+                                   sampleData);
         }
 
         /// <summary>
@@ -215,7 +222,7 @@ namespace httpapi.web.Controllers
             writer.Flush();
             stream.Position = 0;
 
-            var response = new HttpResponseMessage {Content =  new StreamContent(stream)};
+            var response = new HttpResponseMessage { Content = new StreamContent(stream) };
             return response;
         }
 
@@ -228,9 +235,9 @@ namespace httpapi.web.Controllers
         {
             var response = new HttpResponseMessage
                                {
-                           Content = new StringContent(@"User-agent: *
+                                   Content = new StringContent(@"User-agent: *
 Disallow: /")
-                       };
+                               };
 
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
             return response;
@@ -320,12 +327,12 @@ Disallow: /")
                                                gzipped = true,
                                                method = Request.Method
                                            });
-            
+
             // There is no compressed content implementation out of the box
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content =
-                new CompressedContent(response.Content, 
+                new CompressedContent(response.Content,
                         CompressedContent.EncodingType.gzip)
             };
         }
@@ -441,14 +448,14 @@ Disallow: /")
         {
             var ext = Path.GetExtension(Request.RequestUri.AbsolutePath);
             var relativePath = extensionlessPath + ext;
-           if(!string.IsNullOrEmpty(query))
+            if (!string.IsNullOrEmpty(query))
             {
                 relativePath += "?" + query;
             }
             var returnPath = new Uri(BaseUri, relativePath);
             return returnPath;
         }
-      
+
         /// <summary>
         /// Gets the HTTP context wrapper.
         /// </summary>
@@ -474,9 +481,9 @@ Disallow: /")
                 .Replace("{times}", "6")
                 .Replace("{lines}", "10")
                 .Replace("{secs}", "3")
-                .Replace("post", "/client/post")
-                .Replace("put", "/client/put")
-                .Replace("delete", "/client/delete?key=k0")
+                .Replace("post", "/client/index")
+                .Replace("put", "/client/index")
+                .Replace("delete", "/client/index")
                 .Replace("setcookies", "setcookies?k1=v1&k2=v2")
                 .Replace("responseheaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
                 ;
@@ -497,5 +504,5 @@ Disallow: /")
         `""""""`
 ";
     }
-    
+
 }
