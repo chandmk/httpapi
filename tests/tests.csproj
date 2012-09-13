@@ -58,13 +58,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\httpapi.csproj">
-      <Project>{01d36439-eeaf-4635-91dd-1e0b21891d18}</Project>
-      <Name>httpapi</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\src\httpapi.web\httpapi.web.csproj">
+      <Project>{105854a6-587d-4a45-9179-b4159b442c23}</Project>
+      <Name>httpapi.web</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

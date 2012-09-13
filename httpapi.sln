@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "httpapi", "src\httpapi.csproj", "{01D36439-EEAF-4635-91DD-1E0B21891D18}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{9E8798D2-F62B-45F1-9D72-085906CE985D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BD0E505F-90E0-4DFC-9148-E1842B3B03CC}"
@@ -12,20 +10,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BD0E50
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "httpapi.web", "src\httpapi.web\httpapi.web.csproj", "{105854A6-587D-4A45-9179-B4159B442C23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{01D36439-EEAF-4635-91DD-1E0B21891D18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01D36439-EEAF-4635-91DD-1E0B21891D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01D36439-EEAF-4635-91DD-1E0B21891D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01D36439-EEAF-4635-91DD-1E0B21891D18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9E8798D2-F62B-45F1-9D72-085906CE985D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9E8798D2-F62B-45F1-9D72-085906CE985D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E8798D2-F62B-45F1-9D72-085906CE985D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E8798D2-F62B-45F1-9D72-085906CE985D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{105854A6-587D-4A45-9179-B4159B442C23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{105854A6-587D-4A45-9179-B4159B442C23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{105854A6-587D-4A45-9179-B4159B442C23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{105854A6-587D-4A45-9179-B4159B442C23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

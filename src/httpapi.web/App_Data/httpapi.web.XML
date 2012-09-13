@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>httpapi.web</name>
+    </assembly>
+    <members>
+        <member name="M:httpapi.web.Controllers.HttpController.Index">
+            <summary>
+            Returns this page
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.UserAgent">
+            <summary>
+            Returns user-agent
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Ip">
+            <summary>
+            Returns origin ip
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Headers">
+            <summary>
+            Returns request header collection
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Cookies">
+            <summary>
+            Returns cookie collection
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.SetCookies">
+            <summary>
+            Allows to set cookies and returns the set cookie collection
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Get">
+            <summary>
+            Returns GET data.  Allows HEAD method calls.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Post">
+            <summary>
+            Adds key value pairs to the existing key value pairs. Server maintains a key value pair of k0/v0 for testing.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Put">
+            <summary>
+            Replaces the key value pair data.  Server maintains a key value pair of k0/v0 for testing.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Delete(System.String)">
+            <summary>
+            Deletes the data for the given key. Server maintains a key value pair of k0/v0 for testing.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Patch">
+            <summary>
+            Returns PATCH data.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Delay(System.Int32)">
+            <summary>
+            Delays response for n-10 secs
+            </summary>
+            <param name="secs">The secs.</param>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Stream(System.Int32)">
+            <summary>
+            Streams n-100 lines
+            </summary>
+            <param name="lines">The lines.</param>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Robotstxt">
+            <summary>
+             returns robots.txt rules
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Html">
+            <summary>
+            Returns html content
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Gzip">
+            <summary>
+            Returns gzip-encoded content.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Deflate">
+            <summary>
+            Returns dflate-encoded content.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Status(System.Int32)">
+            <summary>
+            Responds with the requested http status code
+            </summary>
+            <param name="code">HttpStatusCode</param>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.ResponseHeaders">
+            <summary>
+            Returns given response headers.
+            </summary>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.Redirect(System.Int32)">
+            <summary>
+            302 Redirects n times.
+            </summary>
+            <param name="times">The times.</param>
+            <returns>HttpResponseMessage.</returns>
+        </member>
+        <member name="M:httpapi.web.Controllers.HttpController.GetHttpContextWrapper">
+            <summary>
+            Gets the HTTP context wrapper.
+            </summary>
+            <returns>HttpContextBase.</returns>
+        </member>
+    </members>
+</doc>

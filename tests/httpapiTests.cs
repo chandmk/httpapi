@@ -9,8 +9,8 @@ using System.Web;
 using System.Web.Http;
 using Moq;
 using NUnit.Framework;
-using httpapi;
-using httpapi.Models;
+using httpapi.web.Models;
+using httpapi.web;
 
 namespace tests
 {

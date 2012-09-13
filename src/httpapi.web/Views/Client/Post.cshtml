@@ -1,0 +1,19 @@
+﻿@model System.Collections.Specialized.NameValueCollection
+
+<div id="body">
+    <section class="featured">
+    <div class="content-wrapper">
+        <h2>HTTP Methods</h2>
+        @using (Html.BeginForm()) {
+            foreach(var key in Model.AllKeys)
+            {
+                @Html.Label(key)
+                @Html.TextBox(key, Model[key])
+                <input id="put" type="button" name="put" value="PUT" />    
+                <input id="delete" type="button" name="delete" value="DELETE" />    
+                <input id="add" type="button" name="add" value="Add" />    
+            }
+        }
+    </div>
+        </section>
+</div>
