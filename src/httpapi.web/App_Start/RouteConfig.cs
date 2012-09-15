@@ -11,7 +11,7 @@ namespace httpapi.web
 
             routes.MapRoute(
                 name: "Default",
-                url: "Client/{action}/{id}",
+                url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Client", action = "Index", id = UrlParameter.Optional }
             );
         }

@@ -17,10 +17,11 @@
                 <li>
                     @Html.Label(key)
                     @Html.TextBox(key, Model[key])
-                    <input id="put" type="submit" name="put" value="PUT" />
+                    
                 </li> 
             }
         </ol>
+        <input id="put" type="submit" name="put" value="PUT" />
     </fieldset>
 }
 
@@ -34,7 +35,6 @@
             { 
                 <li>
                     <label id="lblKey">@key - @Model[key]</label>
-                    @Html.Hidden("key", key)
                     <input id="delete" type="submit" name="delete" value="DELETE" />
                 </li> 
             }
@@ -53,12 +53,19 @@
             @foreach (var key in Model.Keys)
             { 
                 <li>
-                    @Html.Label(key)
-                    @Html.TextBox(key, Model[key])
+                    <label id="lblKey">@key - @Model[key]</label>
                 </li> 
             }
         </ol>
+      
+        <label id="key">Key</label>
+        @Html.TextBox("key" ) 
+        <label id="key">Value</label>
+         @Html.TextBox("value" )
         <input id="add" type="submit" name="add" value="Add" />
+        <a href="/client/test">Reset</a>
 
     </fieldset>
 }
+
+

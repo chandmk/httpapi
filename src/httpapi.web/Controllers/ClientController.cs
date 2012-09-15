@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
 using System.Net.Http;
-using System.Web;
 using System.Web.Mvc;
 using httpapi.web.Models;
 
@@ -11,36 +8,56 @@ namespace httpapi.web.Controllers
 {
     public class ClientController : Controller
     {
-        public ActionResult Index()
+        public ActionResult Test()
         {
-            var content = GetExistingFormValues();
+            var apiContent = TempData["APIContent"] as SampleData;
+            var content = apiContent ?? GetExistingFormValues();
             return View(content.form);
         }
 
         [HttpPost]
-        public ActionResult Post(KeyValuePair<string, string> item)
+        public ActionResult Delete(FormCollection data)
         {
-            return View();
-        }
-
-        public ActionResult Delete(string key)
-        {
-            var client = CreateClient();
-            var response = client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "delete?key=" + key)).Result;
+            var formUrlEncodedContent = ExtractFormData(data);
+            var request = new HttpRequestMessage(HttpMethod.Put, "delete?key=" + data["key"]) { Content = formUrlEncodedContent };
+            var response = CreateClient().SendAsync(request).Result;
             var result = response.Content.ReadAsAsync<SampleData>().Result;
-            var form = result.form;
-            return View("Index", form);
-        }
-
-        public ActionResult Put()
-        {
-            return View();
+            TempData["APIContent"] = result;
+            return RedirectToAction("test");
         }
 
         [HttpPost]
-        public ActionResult Put(KeyValuePair<string, string> item)
+        public ActionResult Put(FormCollection data )
         {
-            return View();
+            var formUrlEncodedContent = ExtractFormData(data);
+            var request = new HttpRequestMessage(HttpMethod.Put, "put") {Content = formUrlEncodedContent};
+            var response = CreateClient().SendAsync(request).Result;
+            var result = response.Content.ReadAsAsync<SampleData>().Result;
+            TempData["APIContent"] = result;
+            return RedirectToAction("test");
+        }
+
+        private static FormUrlEncodedContent ExtractFormData(FormCollection data)
+        {
+            var content = new Dictionary<string, string>();
+            foreach (var key in data.AllKeys)
+            {
+                if(key.StartsWith("k"))
+                content[key] = data[key];
+            }
+            var formUrlEncodedContent = new FormUrlEncodedContent(content);
+            return formUrlEncodedContent;
+        }
+
+        [HttpPost]
+        public ActionResult Post(string key, string value)
+        {
+            var formUrlEncodedContent = new FormUrlEncodedContent( new Dictionary<string, string>() {{key, value}});
+            var request = new HttpRequestMessage(HttpMethod.Post, "post") { Content = formUrlEncodedContent };
+            var response = CreateClient().SendAsync(request).Result;
+            var result = response.Content.ReadAsAsync<SampleData>().Result;
+            TempData["APIContent"] = result;
+            return RedirectToAction("test");
         }
 
         private SampleData GetExistingFormValues()

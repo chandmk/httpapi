@@ -96,13 +96,19 @@ namespace httpapi.web.Controllers
         [HttpHead, HttpGet]
         public HttpResponseMessage Get()
         {
+            var sampleData = GetSampleData();
+
+            return Request.CreateResponse(HttpStatusCode.OK,
+                                   sampleData);
+        }
+
+        private SampleData GetSampleData()
+        {
             var sampleData = SampleData.WithDefaults();
             sampleData.url = Request.RequestUri.ToString();
             sampleData.headers = GetRequestHeaders();
             sampleData.origin = UserIpAddress;
-
-            return Request.CreateResponse(HttpStatusCode.OK,
-                                   sampleData);
+             return sampleData;
         }
 
         /// <summary>
@@ -112,18 +118,18 @@ namespace httpapi.web.Controllers
         [HttpPost]
         public HttpResponseMessage Post()
         {
-            var existingHeaders =  SampleData.WithDefaults().form;
-            var newHeaders = Request.Content.ReadAsFormDataAsync().Result;
-            foreach (var key in newHeaders.AllKeys)
+            var existingFormValues = GetSampleData().form;
+            var newFormValues = Request.Content.ReadAsFormDataAsync().Result;
+            foreach (var key in newFormValues.AllKeys)
             {
-               existingHeaders.Add(key, newHeaders[key]);
+               existingFormValues.Add(key, newFormValues[key]);
             }
-            var sampleData = new SampleData()
+            var sampleData = new SampleData
                                  {
                                      url = Request.RequestUri.ToString(),
                                      headers = GetRequestHeaders(),
                                      origin = UserIpAddress,
-                                     form = existingHeaders
+                                     form = existingFormValues
                                  };
             return Request.CreateResponse(HttpStatusCode.OK,
                                    sampleData);
@@ -136,15 +142,29 @@ namespace httpapi.web.Controllers
         [HttpPut]
         public HttpResponseMessage Put()
         {
-            var existingHeaders = SampleData.WithDefaults().form;
-            var newHeaders = Request.Content.ReadAsFormDataAsync().Result;
-            existingHeaders[existingHeaders.Keys.First()] = newHeaders[existingHeaders.Keys.First()];
+            var existingFormValues = GetSampleData().form;
+            var newFormValues = Request.Content.ReadAsFormDataAsync().Result;
+            bool foundKey = false;
+            foreach (var key in newFormValues.AllKeys)
+            {
+                
+                 if(existingFormValues.ContainsKey(key))
+                 {
+                     existingFormValues[key] = newFormValues[key];
+                     foundKey = true;
+                 }
+            }
+           if(!foundKey)
+           {
+               return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Key not found");
+           }
+           
             var sampleData = new SampleData
                                  {
                                      url = Request.RequestUri.ToString(),
                                      headers = GetRequestHeaders(),
                                      origin = UserIpAddress,
-                                     form = existingHeaders,
+                                     form = existingFormValues,
                                  };
             return Request.CreateResponse(HttpStatusCode.OK,
                                    sampleData);
@@ -157,7 +177,7 @@ namespace httpapi.web.Controllers
         [HttpDelete]
         public HttpResponseMessage Delete(string key)
         {
-            var existingFormValues = SampleData.WithDefaults().form;
+            var existingFormValues = GetSampleData().form;
             existingFormValues.Remove(key);
             var sampleData = new SampleData()
                                 {
@@ -481,9 +501,9 @@ Disallow: /")
                 .Replace("{times}", "6")
                 .Replace("{lines}", "10")
                 .Replace("{secs}", "3")
-                .Replace("post", "/client/index")
-                .Replace("put", "/client/index")
-                .Replace("delete", "/client/index")
+                .Replace("post", "/client/test")
+                .Replace("put", "/client/test")
+                .Replace("delete", "/client/test")
                 .Replace("setcookies", "setcookies?k1=v1&k2=v2")
                 .Replace("responseheaders", "responseheaders?Content-Type=text/plain;%20charset=UTF-8&Server=httpapi")
                 ;
