@@ -1,71 +1,130 @@
 ﻿@model  Dictionary<string, object>
 
 <hgroup class="title">
-    <h1>HTTP Methods</h1>
-    <h2>POST, PUT, DELETE</h2>
+    <h1>HTTP Methods Test Client</h1>
+    <h3 style="float: right"><a href="/Index">Api Home</a></h3>
 </hgroup>
 
+<section class="featured">
+    <div class="content-wrapper">
+        <h3 style="float: right"><a href="/client/test">Reset</a></h3>
+        <h2>PUT</h2>
+        <h4>@ViewBag.Message</h4>
+        @using (Html.BeginForm("Put", "Client"))
+        {
+            @Html.AntiForgeryToken()
+            <fieldset>
+                <legend>PUT</legend>
+                @if (ViewBag.Updated)
+                {
+                    <h6>New Form Key/Value Pairs: </h6>
+                    <ol>
+                        @foreach (var key in Model.Keys)
+                        { 
+                            <li>
+                                <label id="lblKey">@key - @Model[key]</label>
+                            </li> 
+                        }
+                    </ol>
+                    <ol>
+                        @foreach (var key in Model.Keys)
+                        { 
+                            <li>
+                                @Html.Label(key)
+                                @Html.TextBox(key, Model[key])
 
-@using (Html.BeginForm("Put", "Client"))
-{
-    @Html.AntiForgeryToken()
-    <fieldset>
-        <legend>PUT</legend>
-        <ol>
-            @foreach (var key in Model.Keys)
-            { 
-                <li>
-                    @Html.Label(key)
-                    @Html.TextBox(key, Model[key])
-                    
-                </li> 
-            }
-        </ol>
-        <input id="put" type="submit" name="put" value="PUT" />
-    </fieldset>
-}
+                            </li> 
+                        }
+                    </ol>
+                }
+                else
+                {
+                    <ol>
+                        @foreach (var key in ViewBag.ExistingFormValues.Keys)
+                        { 
+                            <li>
+                                <label id="lblKey">@key</label>
+                                <input type="text" id="@key" name="@key" value="@ViewBag.ExistingFormValues[key]"/>
+                            </li> 
+                        }
+                    </ol>
+                }
+                <input id="put" type="submit" name="put" value="PUT" />
+            </fieldset>
+        }
+    </div>
+</section>
+<p></p>
+<section class="featured">
+    <div class="content-wrapper">
+         <h3 class="clear-fix" style="float: right"><a href="/client/test">Reset</a></h3>
+        <h2>DELETE</h2>
+       
+        <h4>@ViewBag.Message</h4>
+        @using (Html.BeginForm("Delete", "Client"))
+        {
+            @Html.AntiForgeryToken()
+            <fieldset>
+                <legend>DELETE</legend>
+                @if (!ViewBag.Deleted)
+                {
+                    <ol>
+                        @foreach (var key in ViewBag.ExistingFormValues.Keys)
+                        {
+                            <li>
+                                <label id="lblKey">@key - @ViewBag.ExistingFormValues[key]</label>
+                                <input id="delete" type="submit" name="delete" value="DELETE" />
+                            </li>
+                        }
+                    </ol>
+                }
 
-@using (Html.BeginForm("Delete", "Client"))
-{
-    @Html.AntiForgeryToken()
-    <fieldset>
-        <legend>DELETE</legend>
-        <ol>
-            @foreach (var key in Model.Keys)
-            { 
-                <li>
-                    <label id="lblKey">@key - @Model[key]</label>
-                    <input id="delete" type="submit" name="delete" value="DELETE" />
-                </li> 
-            }
-        </ol>
+            </fieldset>
+        }
+    </div>
+</section>
+<p></p>
+<section class="featured">
+    <div class="content-wrapper">
+        <h3 style="float: right"><a href="/client/test">Reset</a></h3>
+        <h2>POST</h2>
+        
+        @using (Html.BeginForm("Post", "Client"))
+        {
+            @Html.AntiForgeryToken()
+            <fieldset>
+                <legend>POST</legend>
+                <h4>@ViewBag.Message</h4>
+                <h6>Existing Form Key/Value Pairs: </h6>
+                <ol>
+                    @foreach (var key in ViewBag.ExistingFormValues.Keys)
+                    { 
+                        <li>
+                            <label id="lblKey">@key - @ViewBag.ExistingFormValues[key]</label>
+                        </li> 
+                    }
+                </ol>
+                @if (Model.Count > 0 && !ViewBag.Deleted && !ViewBag.Updated)
+                {
+                    <h6>New Form Key/Value Pairs: </h6>
+                    <ol>
+                        @foreach (var key in Model.Keys)
+                        { 
+                            <li>
+                                <label id="lblKey">@key - @Model[key]</label>
+                            </li> 
+                        }
+                    </ol>
+                }
 
-    </fieldset>
-}
-
-
-@using (Html.BeginForm("Post", "Client"))
-{
-    @Html.AntiForgeryToken()
-    <fieldset>
-        <legend>POST</legend>
-        <ol>
-            @foreach (var key in Model.Keys)
-            { 
-                <li>
-                    <label id="lblKey">@key - @Model[key]</label>
-                </li> 
-            }
-        </ol>
-      
-        <label id="key">Key</label>
-        @Html.TextBox("key" ) 
-        <label id="key">Value</label>
-         @Html.TextBox("value" )
-        <input id="add" type="submit" name="add" value="Add" />
-        <a href="/client/test">Reset</a>
-
-    </fieldset>
-}
-
+                <h6>Post new key value pair</h6>
+                <label id="key">Key</label>
+                @Html.TextBox("key")
+                <label id="Value">Value</label>
+                @Html.TextBox("value")
+                <input id="add" type="submit" name="add" value="Add" />
+            </fieldset>
+        }
+    </div>
+</section>
 

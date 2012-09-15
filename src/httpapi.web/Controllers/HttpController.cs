@@ -147,11 +147,19 @@ namespace httpapi.web.Controllers
             bool foundKey = false;
             foreach (var key in newFormValues.AllKeys)
             {
-                
                  if(existingFormValues.ContainsKey(key))
                  {
-                     existingFormValues[key] = newFormValues[key];
                      foundKey = true;
+                     if (existingFormValues[key].ToString() != newFormValues[key])
+                     {
+                         existingFormValues[key] = newFormValues[key];
+                     }
+                     else
+                     {
+                         var response = Request.CreateResponse(HttpStatusCode.NotModified);
+                         response.ReasonPhrase = "Resource not modified";
+                         return response;
+                     }
                  }
             }
            if(!foundKey)

@@ -10,9 +10,17 @@ namespace httpapi.web.Controllers
     {
         public ActionResult Test()
         {
+            ViewBag.Message = TempData["Message"];
+            ViewBag.Deleted = TempData["Deleted"] ?? false;
+            ViewBag.Updated = TempData["Updated"] ?? false;
+            ViewBag.ExistingFormValues = GetExistingFormValues().form;
             var apiContent = TempData["APIContent"] as SampleData;
-            var content = apiContent ?? GetExistingFormValues();
-            return View(content.form);
+            var content = new Dictionary<string, object>();
+            if(apiContent != null)
+            {
+                content = apiContent.form;
+            }
+            return View(content);
         }
 
         [HttpPost]
@@ -23,6 +31,7 @@ namespace httpapi.web.Controllers
             var response = CreateClient().SendAsync(request).Result;
             var result = response.Content.ReadAsAsync<SampleData>().Result;
             TempData["APIContent"] = result;
+            TempData["Deleted"] = true;
             return RedirectToAction("test");
         }
 
@@ -32,8 +41,17 @@ namespace httpapi.web.Controllers
             var formUrlEncodedContent = ExtractFormData(data);
             var request = new HttpRequestMessage(HttpMethod.Put, "put") {Content = formUrlEncodedContent};
             var response = CreateClient().SendAsync(request).Result;
-            var result = response.Content.ReadAsAsync<SampleData>().Result;
-            TempData["APIContent"] = result;
+            if(response.IsSuccessStatusCode)
+            {
+                var result = response.Content.ReadAsAsync<SampleData>().Result;
+                TempData["APIContent"] = result;
+                TempData["Updated"] = true;
+            }
+            else
+            {
+                TempData["Message"] = response.ReasonPhrase;
+            }
+           
             return RedirectToAction("test");
         }
 
