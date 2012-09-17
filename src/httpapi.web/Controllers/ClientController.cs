@@ -89,7 +89,14 @@ namespace httpapi.web.Controllers
         private HttpClient CreateClient()
         {
             var currentUrl = ControllerContext.HttpContext.Request.Url;
-            Uri baseUri = new UriBuilder(currentUrl.Scheme, currentUrl.Host, currentUrl.Port).Uri;
+            var port = 80;
+
+            // to workaround appharbor limiation
+            if (ControllerContext.HttpContext.Request.IsLocal)
+            {
+                port = currentUrl.Port;
+            }
+            Uri baseUri = new UriBuilder(currentUrl.Scheme, currentUrl.Host, port).Uri;
             var client = new HttpClient {BaseAddress = baseUri};
             return client;
         }
